@@ -1,3 +1,7 @@
+--[[
+	LuaEvent - Copyright (C) 2007 Thomas Harning <harningt@gmail.com>
+	Licensed as LGPL - See doc/COPYING for details.
+]]
 module("luaevent", package.seeall)
 require("luaevent.core")
 

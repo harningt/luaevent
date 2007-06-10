@@ -1,3 +1,6 @@
+/* LuaEvent - Copyright (C) 2007 Thomas Harning <harningt@gmail.com>
+ * Licensed as LGPL - See doc/COPYING for details */
+
 #include "luaevent.h"
 
 #include <lua.h>

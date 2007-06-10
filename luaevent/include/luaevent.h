@@ -1,3 +1,5 @@
+/* LuaEvent - Copyright (C) 2007 Thomas Harning <harningt@gmail.com>
+ * Licensed as LGPL - See doc/COPYING for details */
 #ifndef LUAEVENT_H
 #define LUAEVENT_H
 

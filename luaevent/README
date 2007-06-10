@@ -1,0 +1,8 @@
+Build Requirements:
+	premake (>= 3.3)
+	libevent (recommend >= 1.3b)
+Usage Requirements:
+	libevent (recommend >= 1.3b)
+	LuaSocket
+
+See test/ directory for examples of usage.
