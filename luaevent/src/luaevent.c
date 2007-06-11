@@ -45,6 +45,7 @@ static void luaevent_callback(int fd, short event, void* p) {
 	lua_pushinteger(L, event);
 	if(lua_pcall(L, 1, 1, 0) || !lua_isnumber(L, -1)) {
 		printf("ERROR IN CB: %s\n", lua_tostring(L, -1));
+		lua_pop(L, 1);
 		freeCallbackArgs(arg);
 		return;
 	}
@@ -119,6 +120,7 @@ static int luaevent_addevent(lua_State* L) {
 	/* Call the callback with all arguments after it to get the loop primed.. */
 	if(lua_pcall(L, top - 2, 1, 0) || !lua_isnumber(L, -1)) {
 		printf("ERROR IN INIT: %s\n", lua_tostring(L, -1));
+		lua_pop(L, 1);
 		return 0;
 	}
 	ret = lua_tointeger(L, -1);
