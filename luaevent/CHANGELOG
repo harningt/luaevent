@@ -1,19 +1,20 @@
+======
 0.1.0 - Revision 6 - 2007-06-10 22:00 EST
-	Completed mostly working version
-	* Moved to a mode where addevent calls a callback  rather than it being instantiated within.
-		If the callback returns -1, then no event is ever setup,
-		Otherwise the integer value is used to setup the event.
-	This allows for using coroutine.wrap rather than a cooked-up wrapper
-	* Tests work, although there are a few remaining issues:
-	* Need to figure a good way of preserving the event object,
-	not sure if current method is good enough, since the socket
-	is the only anchor, and it is only held inside the coro.. 
-	circular reference, something that Lua 'handles' well.
-	* Doing more than the maximum sockets the process is allows
-	causes strangeness to occur in libevent.. somehow
-	it is getting around to epoll_add which is causing valgrind
-	to barf.
-	* Added cheap protection code for failures in callback handlers
-
+Completed mostly working version
+* Moved to a mode where addevent calls a callback  rather than it being instantiated within.
+	If the callback returns -1, then no event is ever setup,
+	Otherwise the integer value is used to setup the event.
+  This allows for using coroutine.wrap rather than a cooked-up wrapper
+* Tests work, although there are a few remaining issues:
+* Need to figure a good way of preserving the event object,
+  not sure if current method is good enough, since the socket
+  is the only anchor, and it is only held inside the coro.. 
+  circular reference, something that Lua 'handles' well.
+* Doing more than the maximum sockets the process is allows
+  causes strangeness to occur in libevent.. somehow
+  it is getting around to epoll_add which is causing valgrind
+  to barf.
+* Added cheap protection code for failures in callback handlers
+======
 0.0.0 - Revision 2 - 2007-06-10 12:00 EST
-	Initial public version, was broken due to self-resume coroutines
+Initial public version, was broken due to self-resume coroutines
