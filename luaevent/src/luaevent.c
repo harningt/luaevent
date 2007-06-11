@@ -74,6 +74,12 @@ static int luaevent_cb_gc(lua_State* L) {
 	return 0;
 }
 
+static int luaevent_cb_getfd(lua_State* L) {
+	le_callback* arg = luaL_checkudata(L, 1, EVENT_CALLBACK_ARG_MT);
+	lua_pushinteger(L, arg->ev.ev_fd);
+	return 1;
+}
+
 int getSocketFd(lua_State* L, int idx) {
 	int fd;
 	luaL_checktype(L, idx, LUA_TUSERDATA);
@@ -90,23 +96,35 @@ int getSocketFd(lua_State* L, int idx) {
 /* Expected to be called at the beginning of the coro that uses it.. 
 Value must be kept until coro is complete....
 */
-/* sock, event, callback */
+/* sock, callback */
 static int luaevent_addevent(lua_State* L) {
-	int fd, event, callbackRef;
+	int fd, callbackRef;
+	int top, ret;
 	le_callback* arg;
 	fd = getSocketFd(L, 1);
-	event = luaL_checkinteger(L, 2);
-	luaL_checktype(L, 3, LUA_TFUNCTION);
-	lua_pushvalue(L, 3);
+	luaL_checktype(L, 2, LUA_TFUNCTION);
+	top = lua_gettop(L);
+	/* Preserve the callback function */
+	lua_pushvalue(L, 2);
 	callbackRef = luaL_ref(L, LUA_REGISTRYINDEX);
+	
+	/* Call the callback with all arguments after it to get the loop primed.. */
+	lua_call(L, top - 2, 1);
+	ret = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+	if(ret == -1) { /* Done, no need to setup event */
+		luaL_unref(L, LUA_REGISTRYINDEX, callbackRef);
+		return 0;
+	}
 	arg = lua_newuserdata(L, sizeof(*arg));
 	luaL_getmetatable(L, EVENT_CALLBACK_ARG_MT);
 	lua_setmetatable(L, -2);
 	
 	arg->L = L;
 	arg->callbackRef = callbackRef;
+	
 	/* Setup event... */
-	event_set(&arg->ev, fd, event | EV_PERSIST, luaevent_callback, arg);
+	event_set(&arg->ev, fd, ret | EV_PERSIST, luaevent_callback, arg);
 	event_base_set(getEventBase(L), &arg->ev);
 	event_add(&arg->ev, NULL);
 	return 1;
@@ -157,6 +175,8 @@ int luaopen_luaevent_core(lua_State* L) {
 	luaL_newmetatable(L, EVENT_CALLBACK_ARG_MT);
 	lua_pushcfunction(L, luaevent_cb_gc);
 	lua_setfield(L, -2, "__gc");
+	lua_pushcfunction(L, luaevent_cb_getfd);
+	lua_setfield(L, -2, "getfd");
 	lua_pop(L, 1);
 
 	setEventBase(L, event_init());
