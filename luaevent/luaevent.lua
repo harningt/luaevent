@@ -87,6 +87,7 @@ end
 local oldAddEvent = luaevent.core.addevent
 luaevent.core.addevent = function(...)
 	local item = oldAddEvent(...)
+	if not item then print("FAILED TO SETUP ITEM") return item end
 	print("SETUP ITEM FOR: ", debug.getmetatable(item).getfd(item))
 	if not hookedObjectMt then
 		hookedObjectMt = true
