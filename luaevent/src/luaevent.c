@@ -43,22 +43,22 @@ static void luaevent_callback(int fd, short event, void* p) {
 	int ret;
 	lua_rawgeti(L, LUA_REGISTRYINDEX, arg->callbackRef);
 	lua_pushinteger(L, event);
-	if(lua_pcall(L, 1, 1, 0) || !lua_isnumber(L, -1)) {
+	if(lua_pcall(L, 1, 1, 0) || !(lua_isnil(L, -1) || lua_isnumber(L, -1))) {
 		printf("ERROR IN CB: %s\n", lua_tostring(L, -1));
 		lua_pop(L, 1);
 		freeCallbackArgs(arg);
 		return;
 	}
-	ret = lua_tointeger(L, -1);
+	ret = lua_tointeger(L, -1) | -1lua_isnil(L, -1);
 	lua_pop(L, 1);
-	if(ret == -1) {
+	if(ret < 0) {
 		freeCallbackArgs(arg);
 		return;
 	}
 	if(ret != EV_READ && ret != EV_WRITE) {
 		printf("BAD RET_VAL: %i\n", ret);
 	}
-	
+	printf("RET VAL: %i\n", ret);
 	struct event *ev = &arg->ev;
 	int newEvent = ret;
 	if(newEvent != event) { // Need to hook up new event...
@@ -118,14 +118,15 @@ static int luaevent_addevent(lua_State* L) {
 	callbackRef = luaL_ref(L, LUA_REGISTRYINDEX);
 	
 	/* Call the callback with all arguments after it to get the loop primed.. */
-	if(lua_pcall(L, top - 2, 1, 0) || !lua_isnumber(L, -1)) {
+	if(lua_pcall(L, top - 2, 1, 0) || !(lua_isnil(L, -1) || lua_isnumber(L, -1))) {
 		printf("ERROR IN INIT: %s\n", lua_tostring(L, -1));
 		lua_pop(L, 1);
 		return 0;
 	}
-	ret = lua_tointeger(L, -1);
+	/* Lua_isnil returns 1 if the value is nil... */
+	ret = lua_tointeger(L, -1) | -lua_isnil(L, -1);
 	lua_pop(L, 1);
-	if(ret == -1) { /* Done, no need to setup event */
+	if(ret < 0) { /* Done, no need to setup event */
 		luaL_unref(L, LUA_REGISTRYINDEX, callbackRef);
 		return 0;
 	}
