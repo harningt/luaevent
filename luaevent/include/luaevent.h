@@ -12,6 +12,7 @@ typedef struct {
 	struct event ev;
 	lua_State* L;
 	int callbackRef;
+	int objectRef; /* TEMP */
 } le_callback;
 
 int luaopen_luaevent(lua_State* L);

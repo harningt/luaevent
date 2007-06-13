@@ -11,9 +11,6 @@ local fair = false
 
 local hookedObjectMt = false
 
--- Weak keys.. the keys are the client sockets
-local clientTable = setmetatable({}, {'__mode', 'k'})
-
 function send(sock, data, start, stop)
 	local s, err
 	local from = start or 1
@@ -79,7 +76,7 @@ local function serverCoroutine(sock, callback)
 			--cl[#cl + 1] = client
 			client:settimeout(0)
 			local coFunc = coroutine.wrap(clientCoroutine)
-			clientTable[client] = luaevent.core.addevent(client, coFunc, client, callback)
+			luaevent.core.addevent(client, coFunc, client, callback)
 		end
 	until false
 end
@@ -103,11 +100,11 @@ end
 
 function addserver(sock, callback)
 	local coFunc = coroutine.wrap(serverCoroutine)
-	clientTable[sock] = luaevent.core.addevent(sock, coFunc, sock, callback)
+	luaevent.core.addevent(sock, coFunc, sock, callback)
 end
 function addthread(sock, func, ...)
 	local coFunc = coroutine.wrap(func)
-	clientTable[sock] = luaevent.core.addevent(sock, coFunc, ...)
+	luaevent.core.addevent(sock, coFunc, ...)
 end
 local _skt_mt = {__index = {
 	connect = function(self, ...)
@@ -132,6 +129,9 @@ local _skt_mt = {__index = {
 		self.timeout=time
 		return
 	end,
+	close = function(self)
+		self.socket:close()
+	end
 }}
 function wrap(sock)
 	return setmetatable({socket = sock}, _skt_mt)

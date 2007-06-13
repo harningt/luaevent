@@ -1,4 +1,12 @@
 ======
+0.1.1 - Revision 14 - 2007-06-13
++ Fixed event-handling code to cancel events on nothing being returned
++ Added socket/object cleanup.
++ Filed bug to libevent about the strange valgrind-released errors
+- Recognized following issues:
+  Timeouts needed
+  Need to handle events setup from inside a coroutine... need to get a global Lua state from a thread...
+======
 0.1.0 - Revision 6 - 2007-06-10 22:00 EST
 Completed mostly working version
 * Moved to a mode where addevent calls a callback  rather than it being instantiated within.
