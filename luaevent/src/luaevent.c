@@ -31,6 +31,7 @@ static void freeCallbackArgs(le_callback* arg) {
 		arg->L = NULL;
 		event_del(&arg->ev);
 		luaL_unref(L, LUA_REGISTRYINDEX, arg->callbackRef);
+		luaL_unref(L, LUA_REGISTRYINDEX, arg->objectRef);
 	}
 }
 
@@ -47,7 +48,6 @@ static int call_callback_function(lua_State* L, int argCount) {
 	if(ret < 0) { /* Done, no need to setup event */
 		return -1;
 	}
-	printf("WAITING FOR: %i RED: %i  WR:%i\n", ret, EV_READ, EV_WRITE);
 	if(ret != EV_READ && ret != EV_WRITE) {
 		printf("BAD RET_VAL IN INIT: %i\n", ret);
 	}
@@ -80,7 +80,6 @@ static void luaevent_callback(int fd, short event, void* p) {
 		return;
 	}
 	
-	printf("RET VAL: %i\n", ret);
 	if(event != ret)
 		setup_event(arg, fd, ret, 1);
 }
@@ -126,7 +125,8 @@ static void push_new_callback(lua_State* L, int callbackRef, int fd, short event
 	
 	arg->L = L;
 	arg->callbackRef = callbackRef;
-	
+	lua_pushvalue(L, -1);
+	arg->objectRef = luaL_ref(L, LUA_REGISTRYINDEX);
 	setup_event(arg, fd, event, 0);
 }
 /* Expected to be called at the beginning of the coro that uses it.. 
