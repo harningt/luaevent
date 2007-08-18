@@ -5,20 +5,30 @@
 
 require"luaevent"
 require"socket"
-local function echoHandler(skt)
-	while true do
-		local data,ret = luaevent.receive(skt, 10)
-		if data == "quit" or ret == 'closed' or not data then
-			break
-		end
-		--collectgarbage()
-		if not luaevent.send(skt, data) then return end
-	end
-	if skt then skt:close() end
+local oldPrint = print
+print = function(...)
+	oldPrint("SRV", ...)
 end
 
+local function echoHandler(skt)
+  while true do
+    local data,ret = luaevent.receive(skt, 10)
+    --print("GOT: ", data, ret)
+    if data == "quit" or ret == 'closed' then
+      break
+    end
+    luaevent.send(skt, data)
+    collectgarbage()
+  end
+  skt:close()
+  --print("DONE")
+end
 local server = assert(socket.bind("localhost", 20000))
 server:settimeout(0)
-
+local coro = coroutine.create
+coroutine.create = function(...)
+	local ret = coro(...)
+	return ret
+end
 luaevent.addserver(server, echoHandler)
 luaevent.loop()

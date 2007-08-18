@@ -9,10 +9,14 @@
 #include <event.h>
 
 typedef struct {
+	struct event_base* base;
+	lua_State* loop_L;
+} le_base;
+
+typedef struct {
 	struct event ev;
-	lua_State* L;
+	le_base* base;
 	int callbackRef;
-	int objectRef; /* TEMP */
 } le_callback;
 
 int luaopen_luaevent(lua_State* L);
