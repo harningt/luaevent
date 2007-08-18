@@ -1,4 +1,13 @@
 ======
+0.1.2 - Revision 15 - 2007-08-18
++ Setup system to use new coro management as described in COROUTINE_MANAGEMENT
+  The callbacks are called from the event_loop 'thread' rather than that which they are
+  created in.  This will prevent the self-resume problem as well as dead-thread problems.
+- Recognized issues to fix in next release:
+  * Socket/event closing needs to be cleaned
+  * luaevent.lua needs refactoring
+  * luaevent.[ch] need to be cleaned up
+======
 0.1.1 - Revision 14 - 2007-06-13
 + Fixed event-handling code to cancel events on nothing being returned
 + Added socket/object cleanup.

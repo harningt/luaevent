@@ -7,9 +7,37 @@ require("luaevent.core")
 
 local EV_READ = luaevent.core.EV_READ
 local EV_WRITE = luaevent.core.EV_WRITE
-local fair = false
+local fair = false -- Not recommended for most cases...
+local base = luaevent.core.new()
+local sockMap = setmetatable({}, {'__mode', 'kv'})
+local function addevent(sock, ...)
+	local item = base:addevent(sock, ...)
+	if not item then print("FAILED TO SETUP ITEM") return item end
+	local fd = sock:getfd()
+	sockMap[item] = fd
+	print("SETUP ITEM FOR: ", fd)
+	if not hookedObjectMt then
+		hookedObjectMt = true
+		--[[
+		local mt = debug.getmetatable(item)
+		local oldGC = mt.__gc
+		mt.__gc = function(...)
+			print("RELEASING ITEM FOR: ", sockMap[(...)])
+			return oldGC(...)
+		end]]
+	end
+	return item
+end
+-- Weak keys.. the keys are the client sockets
+local clientTable = setmetatable({}, {'__mode', 'kv'})
 
-local hookedObjectMt = false
+local function getWrapper()
+	local running = coroutine.running()
+	return function(...)
+		if coroutine.running() == running then return end
+		return select(2, coroutine.resume(running, ...))
+	end
+end
 
 function send(sock, data, start, stop)
 	local s, err
@@ -21,9 +49,11 @@ function send(sock, data, start, stop)
 		-- Add extra coro swap for fairness
 		-- CURRENTLY DISABLED FOR TESTING......
 		if fair and math.random(100) > 90 then
+			if not clientTable[sock] then clientTable[sock] = addevent(sock, EV_WRITE, getWrapper()) end
 			coroutine.yield(EV_WRITE)
 		end
 		if s or err ~= "timeout" then return s, err, sent end
+		if not clientTable[sock] then clientTable[sock] = addevent(sock, EV_WRITE, getWrapper()) end
 		coroutine.yield(EV_WRITE)
 	until false
 end
@@ -33,6 +63,7 @@ function receive(sock, pattern, part)
 	repeat
 		s, err, part = sock:receive(pattern, part)
 		if s or err ~= "timeout" then return s, err, part end
+		if not clientTable[sock] then clientTable[sock] = addevent(sock, EV_READ, getWrapper()) end
 		coroutine.yield(EV_READ)
 	until false
 end
@@ -45,6 +76,7 @@ function receivePartial(client, pattern)
 	s, err, part = client:receive(pattern)
 	if s or ( (type(pattern)=="number") and part~="" and part ~=nil ) or 
 		err ~= "timeout" then return s, err, part end
+		if not clientTable[sock] then clientTable[sock] = addevent(sock, EV_READ, getWrapper()) end
 		coroutine.yield(EV_READ)
 	until false
 end
@@ -52,6 +84,7 @@ function connect(sock, ...)
 	sock:settimeout(0)
 	local ret, err = sock:connect(...)
 	if ret or err ~= "timeout" then return ret, err end
+	if not clientTable[sock] then clientTable[sock] = addevent(sock, EV_WRITE, getWrapper()) end
 	coroutine.yield(EV_WRITE)
 	ret, err = sock:connect(...)
 	if err == "already connected" then
@@ -66,74 +99,59 @@ local function clientCoroutine(sock, handler)
 	-- Figure out what to do ......
 	return handler(sock)
 end
-
+local function handleClient(co, client, handler)
+	local ok, res, event = coroutine.resume(co, client, handler)
+end
 local function serverCoroutine(sock, callback)
+	local listenItem = addevent(sock, EV_READ, getWrapper())
 	repeat
 		local event = coroutine.yield(EV_READ)
 		-- Get new socket
 		local client = sock:accept()
 		if client then
-			--cl[#cl + 1] = client
 			client:settimeout(0)
-			local coFunc = coroutine.wrap(clientCoroutine)
-			luaevent.core.addevent(client, coFunc, client, callback)
+			local co = coroutine.create(clientCoroutine)
+			handleClient(co, client, callback)
 		end
 	until false
 end
-
-local oldAddEvent = luaevent.core.addevent
-luaevent.core.addevent = function(...)
-	local item = oldAddEvent(...)
-	if not item then print("FAILED TO SETUP ITEM") return item end
-	print("SETUP ITEM FOR: ", debug.getmetatable(item).getfd(item))
-	if not hookedObjectMt then
-		hookedObjectMt = true
-		local mt = debug.getmetatable(item)
-		local oldGC = mt.__gc
-		mt.__gc = function(...)
-			print("RELEASING ITEM FOR: ", mt.getfd(...))
-			return oldGC(...)
-		end
-	end
-	return item
-end
-
 function addserver(sock, callback)
-	local coFunc = coroutine.wrap(serverCoroutine)
-	luaevent.core.addevent(sock, coFunc, sock, callback)
+	local coro = coroutine.create(serverCoroutine)
+	assert(coroutine.resume(coro, sock, callback))
 end
-function addthread(sock, func, ...)
-	local coFunc = coroutine.wrap(func)
-	luaevent.core.addevent(sock, coFunc, ...)
+function addthread(func, ...)
+	return coroutine.resume(coroutine.create(func), ...)
 end
 local _skt_mt = {__index = {
 	connect = function(self, ...)
 		return connect(self.socket, ...)
 	end,
 	send = function (self, data)
-		return send (self.socket, data)
+		return send(self.socket, data)
 	end,
 	
 	receive = function (self, pattern)
 		if (self.timeout==0) then
   			return receivePartial(self.socket, pattern)
   		end
-		return receive (self.socket, pattern)
+		return receive(self.socket, pattern)
 	end,
 	
 	flush = function (self)
-		return flush (self.socket)
+		return flush(self.socket)
 	end,
 	
 	settimeout = function (self,time)
 		self.timeout=time
 		return
 	end,
+	
 	close = function(self)
+		clientTable[self.socket]:close()
 		self.socket:close()
 	end
 }}
 function wrap(sock)
 	return setmetatable({socket = sock}, _skt_mt)
 end
-loop = luaevent.core.loop
+loop = function(...) base:loop(...) end
