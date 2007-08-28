@@ -6,3 +6,8 @@ Usage Requirements:
 	LuaSocket
 
 See test/ directory for examples of usage.
+
+Project page: http://luaforge.net/projects/luaevent/
+GIT Repos:
+git://repo.or.cz/luaevent.git
+http://repo.or.cz/r/luaevent.git
