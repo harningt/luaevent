@@ -19,7 +19,7 @@ if linux then
 	package.buildoptions = { "-Wall" }
 	package.config["Debug"].buildoptions = { "-O0" }
 	package.linkoptions =  { "-Wall -L/usr/local/lib" }
-	package.postbuildcommands = { "mkdir -p test/luaevent", "cp bin/* test/luaevent", "cp luaevent.lua test" }
+	package.postbuildcommands = { "mkdir -p test/luaevent", "cp bin/* test/luaevent", "cp lua/* test" }
 else
 	print([[Other environements currently untested, may need tweaking]])
 end
