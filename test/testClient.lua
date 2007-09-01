@@ -12,6 +12,7 @@ local function func()
 	sock = luaevent.wrap(sock)
 	print(assert(sock:connect("localhost", 20000)))
 	for i = 1, 100 do assert(sock:send("Greet me  ")) assert(sock:receive(10)) collectgarbage() end
+	print("COMPLETE")
 end
 
 luaevent.addthread(func)
