@@ -7,37 +7,25 @@ require("luaevent.core")
 
 local EV_READ = luaevent.core.EV_READ
 local EV_WRITE = luaevent.core.EV_WRITE
-local fair = false -- Not recommended for most cases...
 local base = luaevent.core.new()
-local sockMap = setmetatable({}, {'__mode', 'kv'})
-local function addevent(sock, ...)
-	local item = base:addevent(sock, ...)
-	if not item then print("FAILED TO SETUP ITEM") return item end
-	local fd = sock:getfd()
-	sockMap[item] = fd
-	print("SETUP ITEM FOR: ", fd)
-	if not hookedObjectMt then
-		hookedObjectMt = true
-		--[[
-		local mt = debug.getmetatable(item)
-		local oldGC = mt.__gc
-		mt.__gc = function(...)
-			print("RELEASING ITEM FOR: ", sockMap[(...)])
-			return oldGC(...)
-		end]]
-	end
-	return item
+
+local function addevent(...)
+	return base:addevent(...)
 end
--- Weak keys.. the keys are the client sockets
-local clientTable = setmetatable({}, {'__mode', 'kv'})
 
 local function getWrapper()
 	local running = coroutine.running()
 	return function(...)
-		if coroutine.running() == running then return end
 		return select(2, coroutine.resume(running, ...))
 	end
 end
+-- Weak keys.. the keys are the client sockets
+local clientTable = setmetatable({}, {'__mode', 'kv'})
+local function socketWait(sock, event)
+	if not clientTable[sock] then clientTable[sock] = addevent(sock, event, getWrapper()) end
+	coroutine.yield(event)
+end
+
 
 function send(sock, data, start, stop)
 	local s, err
@@ -46,15 +34,8 @@ function send(sock, data, start, stop)
 	repeat
 		from = from + sent
 		s, err, sent = sock:send(data, from, stop)
-		-- Add extra coro swap for fairness
-		-- CURRENTLY DISABLED FOR TESTING......
-		if fair and math.random(100) > 90 then
-			if not clientTable[sock] then clientTable[sock] = addevent(sock, EV_WRITE, getWrapper()) end
-			coroutine.yield(EV_WRITE)
-		end
 		if s or err ~= "timeout" then return s, err, sent end
-		if not clientTable[sock] then clientTable[sock] = addevent(sock, EV_WRITE, getWrapper()) end
-		coroutine.yield(EV_WRITE)
+		socketWait(sock, EV_WRITE)
 	until false
 end
 function receive(sock, pattern, part)
@@ -63,8 +44,7 @@ function receive(sock, pattern, part)
 	repeat
 		s, err, part = sock:receive(pattern, part)
 		if s or err ~= "timeout" then return s, err, part end
-		if not clientTable[sock] then clientTable[sock] = addevent(sock, EV_READ, getWrapper()) end
-		coroutine.yield(EV_READ)
+		socketWait(sock, EV_READ)
 	until false
 end
 -- same as above but with special treatment when reading chunks,
@@ -76,16 +56,14 @@ function receivePartial(client, pattern)
 	s, err, part = client:receive(pattern)
 	if s or ( (type(pattern)=="number") and part~="" and part ~=nil ) or 
 		err ~= "timeout" then return s, err, part end
-		if not clientTable[sock] then clientTable[sock] = addevent(sock, EV_READ, getWrapper()) end
-		coroutine.yield(EV_READ)
+		socketWait(sock, EV_READ)
 	until false
 end
 function connect(sock, ...)
 	sock:settimeout(0)
 	local ret, err = sock:connect(...)
 	if ret or err ~= "timeout" then return ret, err end
-	if not clientTable[sock] then clientTable[sock] = addevent(sock, EV_WRITE, getWrapper()) end
-	coroutine.yield(EV_WRITE)
+	socketWait(sock, EV_WRITE)
 	ret, err = sock:connect(...)
 	if err == "already connected" then
 		return 1
