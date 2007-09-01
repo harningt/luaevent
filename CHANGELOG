@@ -1,5 +1,5 @@
 ======
-0.1.2 - Revision 15 - 2007-08-18
+0.1.2 - 2007-08-18
 + Setup system to use new coro management as described in COROUTINE_MANAGEMENT
   The callbacks are called from the event_loop 'thread' rather than that which they are
   created in.  This will prevent the self-resume problem as well as dead-thread problems.
@@ -8,7 +8,7 @@
   * luaevent.lua needs refactoring
   * luaevent.[ch] need to be cleaned up
 ======
-0.1.1 - Revision 14 - 2007-06-13
+0.1.1 - 2007-06-13
 + Fixed event-handling code to cancel events on nothing being returned
 + Added socket/object cleanup.
 + Filed bug to libevent about the strange valgrind-released errors
@@ -16,7 +16,7 @@
   Timeouts needed
   Need to handle events setup from inside a coroutine... need to get a global Lua state from a thread...
 ======
-0.1.0 - Revision 6 - 2007-06-10 22:00 EST
+0.1.0 - 2007-06-10 22:00 EST
 Completed mostly working version
 * Moved to a mode where addevent calls a callback  rather than it being instantiated within.
 	If the callback returns -1, then no event is ever setup,
@@ -33,5 +33,5 @@ Completed mostly working version
   to barf.
 * Added cheap protection code for failures in callback handlers
 ======
-0.0.0 - Revision 2 - 2007-06-10 12:00 EST
+0.0.0 - 2007-06-10 12:00 EST
 Initial public version, was broken due to self-resume coroutines
