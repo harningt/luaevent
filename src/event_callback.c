@@ -23,7 +23,13 @@ void luaevent_callback(int fd, short event, void* p) {
 	lua_State* L;
 	int ret;
 	double newTimeout = -1;
-	assert(cb && cb->base && cb->base->loop_L);
+	assert(cb);
+	if(!cb->base) {
+		/* Callback has been collected... die */
+		/* TODO: What should really be done here... */
+		return;
+	}
+	assert(cb->base->loop_L);
 	L = cb->base->loop_L;
 	lua_rawgeti(L, LUA_REGISTRYINDEX, cb->callbackRef);
 	lua_pushinteger(L, event);
