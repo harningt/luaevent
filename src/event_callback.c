@@ -3,6 +3,7 @@
 #include "event_callback.h"
 #include <assert.h>
 #include <lauxlib.h>
+#include <string.h>
 
 #define EVENT_CALLBACK_ARG_MT "EVENT_CALLBACK_ARG_MT"
 
@@ -31,7 +32,7 @@ void luaevent_callback(int fd, short event, void* p) {
 	if(lua_isnumber(L, -1)) {
 		newTimeout = lua_tonumber(L, -1);
 		if(newTimeout <= 0) {
-			memset(&cb->timeout, 0, sizeof(arg->timeout));
+			memset(&cb->timeout, 0, sizeof(cb->timeout));
 		} else {
 			load_timeval(newTimeout, &cb->timeout);
 		}
@@ -45,7 +46,7 @@ void luaevent_callback(int fd, short event, void* p) {
 		/* NOTE: Currently, even if new timeout is the same as the old, a new event is setup regardless... */
 		if(newEvent != event || newTimeout != -1) { // Need to hook up new event...
 			struct timeval *ptv = &cb->timeout;
-			if(!cb->timeout.sec && !cb->timeout.usec)
+			if(!cb->timeout.tv_sec && !cb->timeout.tv_usec)
 				ptv = NULL;
 			event_del(ev);
 			event_set(ev, fd, EV_PERSIST | newEvent, luaevent_callback, cb);
