@@ -18,25 +18,39 @@ is used, no need to manually de-allocate */
 
 /* Index for coroutine is fd as integer for *nix, as lightuserdata for Win */
 void luaevent_callback(int fd, short event, void* p) {
-	le_callback* arg = p;
+	le_callback* cb = p;
 	lua_State* L;
 	int ret;
-	assert(arg && arg->base && arg->base->loop_L);
-	L = arg->base->loop_L;
-	lua_rawgeti(L, LUA_REGISTRYINDEX, arg->callbackRef);
+	double newTimeout = -1;
+	assert(cb && cb->base && cb->base->loop_L);
+	L = cb->base->loop_L;
+	lua_rawgeti(L, LUA_REGISTRYINDEX, cb->callbackRef);
 	lua_pushinteger(L, event);
-	lua_call(L, 1, 1);
-	ret = lua_tointeger(L, -1);
+	lua_call(L, 1, 2);
+	ret = lua_tointeger(L, -2);
+	if(lua_isnumber(L, -1)) {
+		newTimeout = lua_tonumber(L, -1);
+		if(newTimeout <= 0) {
+			memset(&cb->timeout, 0, sizeof(arg->timeout));
+		} else {
+			load_timeval(newTimeout, &cb->timeout);
+		}
+	}
 	lua_pop(L, 1);
 	if(ret == -1) {
-		freeCallbackArgs(arg, L);
+		freeCallbackArgs(cb, L);
 	} else {
-		struct event *ev = &arg->ev;
+		struct event *ev = &cb->ev;
 		int newEvent = ret;
-		if(newEvent != event) { // Need to hook up new event...
+		/* NOTE: Currently, even if new timeout is the same as the old, a new event is setup regardless... */
+		if(newEvent != event || newTimeout != -1) { // Need to hook up new event...
+			struct timeval *ptv = &cb->timeout;
+			if(!cb->timeout.sec && !cb->timeout.usec)
+				ptv = NULL;
 			event_del(ev);
-			event_set(ev, fd, EV_PERSIST | newEvent, luaevent_callback, arg);
-			event_add(ev, NULL);
+			event_set(ev, fd, EV_PERSIST | newEvent, luaevent_callback, cb);
+			/* Assume cannot set a new timeout.. */
+			event_add(ev, ptv);
 		}
 	}
 }
@@ -58,6 +72,7 @@ le_callback* event_callback_push(lua_State* L, int baseIdx, int callbackIdx) {
 	lua_pushvalue(L, callbackIdx);
 	cb->callbackRef = luaL_ref(L, LUA_REGISTRYINDEX);
 	cb->base = base;
+	memset(&cb->timeout, 0, sizeof(cb->timeout));
 	return cb;
 }
 

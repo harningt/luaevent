@@ -13,6 +13,7 @@ typedef struct {
 	struct event ev;
 	le_base* base;
 	int callbackRef;
+	struct timeval timeout;
 } le_callback;
 
 int event_callback_register(lua_State* L);

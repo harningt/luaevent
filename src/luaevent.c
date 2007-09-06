@@ -45,16 +45,33 @@ int getSocketFd(lua_State* L, int idx) {
 	return fd;
 }
 
-/* sock, event, callback */
+void load_timeval(double time, struct timeval *tv) {
+	tv->sec = (int)time;
+	tv->usec = (time * 1000000) % 1000000;
+}
+
+/* sock, event, callback, timeout */
 static int luaevent_addevent(lua_State* L) {
 	int fd, event;
 	le_callback* arg = event_callback_push(L, 1, 4);
-	fd = getSocketFd(L, 2);
+	struct timeval *tv = &arg->timeout;
+	if(lua_isnil(L, 2) && lua_isnumber(L, 5)) {
+		fd = -1; /* Per event_timer_set.... */
+	} else {
+		fd = getSocketFd(L, 2);
+	}
 	event = luaL_checkinteger(L, 3);
+	if(lua_isnumber(L, 5)) {
+		double time = lua_tonumber(L, 5);
+		load_timeval(time, tv);
+	} else {
+		tv = NULL;
+	}
+
 	/* Setup event... */
 	event_set(&arg->ev, fd, event | EV_PERSIST, luaevent_callback, arg);
 	event_base_set(arg->base->base, &arg->ev);
-	event_add(&arg->ev, NULL);
+	event_add(&arg->ev, tv);
 	return 1;
 }
 
@@ -86,6 +103,7 @@ static namedInteger consts[] = {
 	{"LEAVE", -1},
 	{"EV_READ", EV_READ},
 	{"EV_WRITE", EV_WRITE},
+	{"EV_TIMEOUT", EV_TIMEOUT},
 	{NULL, 0}
 };
 

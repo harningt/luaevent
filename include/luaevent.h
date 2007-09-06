@@ -14,6 +14,7 @@ typedef struct {
 } le_base;
 
 le_base* event_base_get(lua_State* L, int idx);
+void load_timeval(double time, struct timeval *tv);
 
 int luaopen_luaevent(lua_State* L);
 
