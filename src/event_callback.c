@@ -1,3 +1,5 @@
+/* LuaEvent - Copyright (C) 2007 Thomas Harning <harningt@gmail.com>
+ * Licensed as LGPL - See doc/COPYING for details */
 #include "event_callback.h"
 #include <assert.h>
 #include <lauxlib.h>
