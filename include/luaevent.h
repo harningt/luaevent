@@ -13,12 +13,6 @@ typedef struct {
 	lua_State* loop_L;
 } le_base;
 
-typedef struct {
-	struct event ev;
-	le_base* base;
-	int callbackRef;
-} le_callback;
-
 int luaopen_luaevent(lua_State* L);
 
 #endif

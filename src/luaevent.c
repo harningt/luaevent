@@ -2,13 +2,13 @@
  * Licensed as LGPL - See doc/COPYING for details */
 
 #include "luaevent.h"
+#include "event_callback.h"
 
 #include <lua.h>
 #include <lauxlib.h>
 #include <assert.h>
 
 #define EVENT_BASE_MT "EVENT_BASE_MT"
-#define EVENT_CALLBACK_ARG_MT "EVENT_CALLBACK_ARG_MT"
 
 int luaevent_newbase(lua_State* L) {
 	le_base *base = (le_base*)lua_newuserdata(L, sizeof(le_base));
@@ -19,53 +19,12 @@ int luaevent_newbase(lua_State* L) {
 	return 1;
 }
 
-void freeCallbackArgs(le_callback* arg, lua_State* L) {
-	if(arg->base) {
-		arg->base = NULL;
-		event_del(&arg->ev);
-		luaL_unref(L, LUA_REGISTRYINDEX, arg->callbackRef);
-	}
-}
-/* le_callback is allocated at the beginning of the coroutine in which it
-is used, no need to manually de-allocate */
-
-/* Index for coroutine is fd as integer for *nix, as lightuserdata for Win */
-static void luaevent_callback(int fd, short event, void* p) {
-	le_callback* arg = p;
-	lua_State* L;
-	int ret;
-	assert(arg && arg->base && arg->base->loop_L);
-	L = arg->base->loop_L;
-	lua_rawgeti(L, LUA_REGISTRYINDEX, arg->callbackRef);
-	lua_pushinteger(L, event);
-	lua_call(L, 1, 1);
-	ret = lua_tointeger(L, -1);
-	lua_pop(L, 1);
-	if(ret == -1) {
-		freeCallbackArgs(arg, L);
-	} else {
-		struct event *ev = &arg->ev;
-		int newEvent = ret;
-		if(newEvent != event) { // Need to hook up new event...
-			event_del(ev);
-			event_set(ev, fd, EV_PERSIST | newEvent, luaevent_callback, arg);
-			event_add(ev, NULL);
-		}
-	}
-}
-
 static int luaevent_base_gc(lua_State* L) {
 	le_base *base = luaL_checkudata(L, 1, EVENT_BASE_MT);
 	if(base->base) {
 		event_base_free(base->base);
 		base->base = NULL;
 	}
-	return 0;
-}
-
-static int luaevent_cb_gc(lua_State* L) {
-	le_callback* arg = luaL_checkudata(L, 1, EVENT_CALLBACK_ARG_MT);
-	freeCallbackArgs(arg, L);
 	return 0;
 }
 
@@ -146,6 +105,8 @@ void setNamedIntegers(lua_State* L, namedInteger* p) {
 
 /* Verified ok */
 int luaopen_luaevent_core(lua_State* L) {
+	/* Register external items */
+	event_callback_register(L);
 	/* Setup metatable */
 	luaL_newmetatable(L, EVENT_BASE_MT);
 	lua_newtable(L);
@@ -153,14 +114,6 @@ int luaopen_luaevent_core(lua_State* L) {
 	lua_setfield(L, -2, "__index");
 	lua_pushcfunction(L, luaevent_base_gc);
 	lua_setfield(L, -2, "__gc");
-	lua_pop(L, 1);
-	luaL_newmetatable(L, EVENT_CALLBACK_ARG_MT);
-	lua_pushcfunction(L, luaevent_cb_gc);
-	lua_setfield(L, -2, "__gc");
-	lua_newtable(L);
-	lua_pushcfunction(L, luaevent_cb_gc);
-	lua_setfield(L, -2, "close");
-	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
 
 	luaL_register(L, "luaevent.core", funcs);
