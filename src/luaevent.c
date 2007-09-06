@@ -1,6 +1,7 @@
 /* LuaEvent - Copyright (C) 2007 Thomas Harning <harningt@gmail.com>
  * Licensed as LGPL - See doc/COPYING for details */
- #include "luaevent.h"
+
+#include "luaevent.h"
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -8,19 +9,6 @@
 
 #define EVENT_BASE_MT "EVENT_BASE_MT"
 #define EVENT_CALLBACK_ARG_MT "EVENT_CALLBACK_ARG_MT"
-#define MAIN_THREAD_LOCATION 1
-
-void setMainThread(lua_State* L) {
-	lua_pushthread(L);
-	lua_rawseti(L, LUA_ENVIRONINDEX, MAIN_THREAD_LOCATION);
-}
-lua_State* getMainThread(lua_State* L) {
-	lua_State* g_L;
-	lua_rawgeti(L, LUA_ENVIRONINDEX, MAIN_THREAD_LOCATION);
-	g_L = lua_tothread(L, -1);
-	lua_pop(L, 1);
-	return g_L;
-}
 
 int luaevent_newbase(lua_State* L) {
 	le_base *base = (le_base*)lua_newuserdata(L, sizeof(le_base));
@@ -158,9 +146,6 @@ void setNamedIntegers(lua_State* L, namedInteger* p) {
 
 /* Verified ok */
 int luaopen_luaevent_core(lua_State* L) {
-	/* Setup environ table */
-	lua_createtable(L, 1, 0);
-	lua_replace(L, LUA_ENVIRONINDEX);
 	/* Setup metatable */
 	luaL_newmetatable(L, EVENT_BASE_MT);
 	lua_newtable(L);
