@@ -10,6 +10,10 @@
 
 #define EVENT_BASE_MT "EVENT_BASE_MT"
 
+le_base* event_base_get(lua_State* L, int idx) {
+	return (le_base*)luaL_checkudata(L, idx, EVENT_BASE_MT);
+}
+
 int luaevent_newbase(lua_State* L) {
 	le_base *base = (le_base*)lua_newuserdata(L, sizeof(le_base));
 	base->loop_L = NULL; /* No running loop */
@@ -20,7 +24,7 @@ int luaevent_newbase(lua_State* L) {
 }
 
 static int luaevent_base_gc(lua_State* L) {
-	le_base *base = luaL_checkudata(L, 1, EVENT_BASE_MT);
+	le_base *base = event_base_get(L, 1);
 	if(base->base) {
 		event_base_free(base->base);
 		base->base = NULL;
@@ -43,29 +47,19 @@ int getSocketFd(lua_State* L, int idx) {
 
 /* sock, event, callback */
 static int luaevent_addevent(lua_State* L) {
-	int fd, event, callbackRef;
-	le_callback* arg;
-	le_base *base = luaL_checkudata(L, 1, EVENT_BASE_MT);
+	int fd, event;
+	le_callback* arg = event_callback_push(L, 1, 4);
 	fd = getSocketFd(L, 2);
 	event = luaL_checkinteger(L, 3);
-	luaL_checktype(L, 4, LUA_TFUNCTION);
-	lua_pushvalue(L, 4);
-	callbackRef = luaL_ref(L, LUA_REGISTRYINDEX);
-	arg = lua_newuserdata(L, sizeof(*arg));
-	luaL_getmetatable(L, EVENT_CALLBACK_ARG_MT);
-	lua_setmetatable(L, -2);
-	
-	arg->base = base;
-	arg->callbackRef = callbackRef;
 	/* Setup event... */
 	event_set(&arg->ev, fd, event | EV_PERSIST, luaevent_callback, arg);
-	event_base_set(base->base, &arg->ev);
+	event_base_set(arg->base->base, &arg->ev);
 	event_add(&arg->ev, NULL);
 	return 1;
 }
 
 static int luaevent_loop(lua_State* L) {
-	le_base *base = luaL_checkudata(L, 1, EVENT_BASE_MT);
+	le_base *base = event_base_get(L, 1);
 	base->loop_L = L;
 	int ret = event_base_loop(base->base, 0);
 	lua_pushinteger(L, ret);

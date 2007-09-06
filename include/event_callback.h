@@ -9,8 +9,6 @@
 #include <sys/time.h>
 #include <event.h>
 
-#define EVENT_CALLBACK_ARG_MT "EVENT_CALLBACK_ARG_MT"
-
 typedef struct {
 	struct event ev;
 	le_base* base;
@@ -18,6 +16,8 @@ typedef struct {
 } le_callback;
 
 int event_callback_register(lua_State* L);
+
+le_callback* event_callback_push(lua_State* L, int baseIdx, int callbackIdx);
 
 void luaevent_callback(int fd, short event, void* p);
 

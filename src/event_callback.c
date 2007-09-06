@@ -4,6 +4,8 @@
 #include <assert.h>
 #include <lauxlib.h>
 
+#define EVENT_CALLBACK_ARG_MT "EVENT_CALLBACK_ARG_MT"
+
 void freeCallbackArgs(le_callback* arg, lua_State* L) {
 	if(arg->base) {
 		arg->base = NULL;
@@ -43,6 +45,20 @@ static int luaevent_cb_gc(lua_State* L) {
 	le_callback* arg = luaL_checkudata(L, 1, EVENT_CALLBACK_ARG_MT);
 	freeCallbackArgs(arg, L);
 	return 0;
+}
+
+le_callback* event_callback_push(lua_State* L, int baseIdx, int callbackIdx) {
+	le_callback* cb;
+	le_base *base = event_base_get(L, baseIdx);
+	luaL_checktype(L, callbackIdx, LUA_TFUNCTION);
+	cb = lua_newuserdata(L, sizeof(*cb));
+	luaL_getmetatable(L, EVENT_CALLBACK_ARG_MT);
+	lua_setmetatable(L, -2);
+
+	lua_pushvalue(L, callbackIdx);
+	cb->callbackRef = luaL_ref(L, LUA_REGISTRYINDEX);
+	cb->base = base;
+	return cb;
 }
 
 int event_callback_register(lua_State* L) {

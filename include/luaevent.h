@@ -13,6 +13,8 @@ typedef struct {
 	lua_State* loop_L;
 } le_base;
 
+le_base* event_base_get(lua_State* L, int idx);
+
 int luaopen_luaevent(lua_State* L);
 
 #endif
