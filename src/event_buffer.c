@@ -8,15 +8,22 @@
 
 #define BUFFER_ADD_CHECK_INPUT_FIRST 1
 
+/* Obtains an le_buffer structure from a given index */
 static le_buffer* event_buffer_get(lua_State* L, int idx) {
 	return (le_buffer*)luaL_checkudata(L, idx, EVENT_BUFFER_MT);
 }
+
+/* Obtains an le_buffer structure from a given index
+	AND checks that it hadn't been prematurely freed
+*/
 static le_buffer* event_buffer_check(lua_State* L, int idx) {
 	le_buffer* buf = (le_buffer*)luaL_checkudata(L, idx, EVENT_BUFFER_MT);
 	if(!buf->buffer)
 		luaL_argerror(L, idx, "Attempt to use closed event_buffer object");
 	return buf;
 }
+
+/* Checks if the given index contains an le_buffer object */
 static int is_event_buffer(lua_State* L, int idx) {
 	int ret;
 	lua_getmetatable(L, idx);
@@ -27,6 +34,7 @@ static int is_event_buffer(lua_State* L, int idx) {
 }
 
 /* TODO: Use lightuserdata mapping to locate hanging object instances */
+/* Pushes the specified evbuffer object onto the stack, attaching a metatable to it */
 static int event_buffer_push(lua_State* L, struct evbuffer* buffer) {
 	le_buffer *buf = (le_buffer*)lua_newuserdata(L, sizeof(le_buffer));
 	buf->buffer = buffer;
@@ -35,10 +43,16 @@ static int event_buffer_push(lua_State* L, struct evbuffer* buffer) {
 	return 1;
 }
 
+/* LUA: new()
+	Pushes a new evbuffer instance on the stack
+*/
 static int event_buffer_push_new(lua_State* L) {
 	return event_buffer_push(L, evbuffer_new());
 }
 
+/* LUA: __gc and buffer:close()
+	Releases the buffer resources
+*/
 static int event_buffer_gc(lua_State* L) {
 	le_buffer* buf = event_buffer_get(L, 1);
 	if(buf->buffer) {
@@ -83,6 +97,9 @@ static int event_buffer_add(lua_State* L) {
 	return 1;
 }
 
+/* LUA: buffer:length()
+	Returns the length of the buffer contents
+*/
 static int event_buffer_get_length(lua_State* L) {
 	le_buffer* buf = event_buffer_check(L, 1);
 	lua_pushinteger(L, EVBUFFER_LENGTH(buf->buffer));
@@ -90,6 +107,11 @@ static int event_buffer_get_length(lua_State* L) {
 }
 
 /* MAYBE: Could add caching */
+/* LUA: buffer:get_data
+	() - Returns all data in buffer
+	(len) - Returns data up to 'len' bytes long
+	(begin,len) - Returns data beginning at 'begin' up to 'len' bytes long
+*/
 static int event_buffer_get_data(lua_State* L) {
 	le_buffer* buf = event_buffer_check(L, 1);
 	int begin, len;
@@ -119,6 +141,9 @@ static int event_buffer_get_data(lua_State* L) {
 	return 1;
 }
 
+/* LUA: buffer:drain(amt)
+	Drains 'amt' bytes from the buffer
+*/
 static int event_buffer_drain(lua_State* L) {
 	le_buffer* buf = event_buffer_check(L, 1);
 	size_t len = luaL_checkinteger(L, 2);
