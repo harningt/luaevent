@@ -3,6 +3,7 @@
 
 #include "event_buffer.h"
 #include <lauxlib.h>
+#include <malloc.h>
 
 #define EVENT_BUFFER_MT "EVENT_BUFFER_MT"
 
@@ -141,6 +142,21 @@ static int event_buffer_get_data(lua_State* L) {
 	return 1;
 }
 
+/* LUA: buffer:readline()
+	Returns a line terminated by either '\r\n','\n\r' or '\r' or '\n'
+	Returns nil and leaves data alone if no terminator is found
+	TODO: Evaluate whether or not the newline is included
+*/
+static int event_buffer_readline(lua_State* L) {
+	le_buffer* buf = event_buffer_check(L, 1);
+	char* line = evbuffer_readline(buf->buffer);
+	if(!line)
+		return 0;
+	lua_pushstring(L, line);
+	free(line);
+	return 1;
+}
+
 /* LUA: buffer:drain(amt)
 	Drains 'amt' bytes from the buffer
 */
@@ -152,15 +168,16 @@ static int event_buffer_drain(lua_State* L) {
 }
 
 static luaL_Reg buffer_funcs[] = {
-	{"add",event_buffer_add},
-	{"length",event_buffer_get_length},
-	{"get_data",event_buffer_get_data},
-	{"drain",event_buffer_drain},
-	{"close",event_buffer_gc},
+	{"add", event_buffer_add},
+	{"length", event_buffer_get_length},
+	{"get_data", event_buffer_get_data},
+	{"readline", event_buffer_readline},
+	{"drain", event_buffer_drain},
+	{"close", event_buffer_gc},
 	{NULL, NULL}
 };
 static luaL_Reg funcs[] = {
-	{"new",event_buffer_push_new},
+	{"new", event_buffer_push_new},
 	{NULL, NULL}
 };
  
