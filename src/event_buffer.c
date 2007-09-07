@@ -11,6 +11,12 @@
 static le_buffer* event_buffer_get(lua_State* L, int idx) {
 	return (le_buffer*)luaL_checkudata(L, idx, EVENT_BUFFER_MT);
 }
+static void event_buffer_check(lua_State* L, int idx) {
+	le_buffer* buf = (le_buffer*)luaL_checkudata(L, idx, EVENT_BUFFER_MT);
+	if(!buf->buffer)
+		luaL_argerror(L, idx, "Attempt to use closed event_buffer object");
+	return buf;
+}
 static int is_event_buffer(lua_State* L, int idx) {
 	int ret;
 	lua_getmetatable(L, idx);
@@ -20,14 +26,36 @@ static int is_event_buffer(lua_State* L, int idx) {
 	return ret;
 }
 
+/* TODO: Use lightuserdata mapping to locate hanging object instances */
+static int event_buffer_push(lua_State* L, struct evbuffer* buffer) {
+	le_buffer *buf = (le_buffer*)lua_newuserdata(L, sizeof(le_buffer));
+	buf->buffer = buffer;
+	luaL_getmetatable(L, EVENT_BUFFER_MT);
+	lua_setmetatable(L, -2);
+	return 1;
+}
+
+static int event_buffer_push_new(lua_State* L) {
+	return event_buffer_push(L, evbuffer_new());
+}
+
+static int event_buffer_gc(lua_State* L) {
+	le_buffer* buf = event_buffer_get(L, 1);
+	if(buf->buffer) {
+		evbuffer_free(buf->buffer);
+		buf->buffer = NULL;
+	}
+	return 0;
+}
+
 /* LUA: buffer:add(...)
 	progressively adds items to the buffer
 		if arg[*] is string, treat as a string:format call
 		if arg[*] is a buffer, perform event_add_buffer
 	returns number of bytes added
 */
-int event_buffer_add(lua_State* L) {
-	le_buffer* buf = event_buffer_get(L, 1);
+static int event_buffer_add(lua_State* L) {
+	le_buffer* buf = event_buffer_check(L, 1);
 	struct evbuffer* buffer = buf->buffer;
 	int oldLength = EVBUFFER_LENGTH(buffer);
 	int last = lua_top(L);
@@ -46,7 +74,7 @@ int event_buffer_add(lua_State* L) {
 			if(0 != evbuffer_add(buffer, data, len))
 				luaL_error(L, "Failed to add data to the buffer");
 		} else {
-			le_buffer* buf2 = event_buffer_get(L, i);
+			le_buffer* buf2 = event_buffer_check(L, i);
 			if(0 != evbuffer_add_buffer(buffer, buf2->buffer))
 				luaL_error(L, "Failed to move buffer-data to the buffer");
 		}
@@ -55,16 +83,43 @@ int event_buffer_add(lua_State* L) {
 	return 1;
 }
 
+static int event_buffer_get_length(lua_State* L) {
+	le_buffer* buf = event_buffer_check(L, 1);
+	lua_pushinteger(L, EVBUFFER_LENGTH(buf->buffer));
+	return 1;
+}
+
+/* MAYBE: Could add caching */
+static int event_buffer_get_data(lua_State* L) {
+	le_buffer* buf = event_buffer_check(L, 1);
+	lua_pushlstring(L, EVBUFFER_DATA(buf->buffer), EVBUFFER_LENGTH(buf->buffer));
+	return 1;
+}
+
+static int event_buffer_drain(lua_State* L) {
+	le_buffer* buf = event_buffer_check(L, 1);
+	size_t len = luaL_checkinteger(L, 2);
+	evbuffer_drain(buf->buffer, len);
+	return 0;
+}
+
 static luaL_Reg buffer_funcs[] = {
 	{"add",event_buffer_add},
+	{"length",event_buffer_get_length},
+	{"get_data",event_buffer_get_data},
+	{"drain",event_buffer_drain},
+	{"close",event_buffer_gc},
 	{NULL, NULL}
 };
 static luaL_Ref funcs[] = {
+	{"new",event_buffer_push_new},
 	{NULL, NULL}
 };
  
 int event_buffer_register(lua_State* L) {
 	luaL_newmetatable(L, EVENT_BUFFER_MT);
+	lua_pushcfunction(L, event_buffer_gc);
+	lua_setfield(L, -2, "__gc");
 	lua_newtable(L);
 	luaL_register(L, NULL, buffer_funcs);
 	lua_setfield(L, -2, "__index");
