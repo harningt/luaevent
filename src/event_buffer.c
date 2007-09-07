@@ -187,6 +187,10 @@ int event_buffer_register(lua_State* L) {
 	luaL_newmetatable(L, EVENT_BUFFER_MT);
 	lua_pushcfunction(L, event_buffer_gc);
 	lua_setfield(L, -2, "__gc");
+	lua_pushcfunction(L, event_buffer_get_length);
+	lua_setfield(L, -2, "__len");
+	lua_pushcfunction(L, event_buffer_get_data);
+	lua_setfield(L, -2, "__tostring");
 	lua_newtable(L);
 	luaL_register(L, NULL, buffer_funcs);
 	lua_setfield(L, -2, "__index");
