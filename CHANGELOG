@@ -6,6 +6,7 @@
  + Added event_buffer object
   * Can 'add' a sequence of strings/event_buffers
   * Can 'get_data', 'length','drain','close' and create new instances
+  * Can 'readline'
 ======
 0.1.2 - 2007-08-18
 + Setup system to use new coro management as described in COROUTINE_MANAGEMENT
