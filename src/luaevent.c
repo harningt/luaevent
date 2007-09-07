@@ -3,6 +3,7 @@
 
 #include "luaevent.h"
 #include "event_callback.h"
+#include "event_buffer.h"
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -119,6 +120,7 @@ void setNamedIntegers(lua_State* L, namedInteger* p) {
 int luaopen_luaevent_core(lua_State* L) {
 	/* Register external items */
 	event_callback_register(L);
+	event_buffer_register(L);
 	/* Setup metatable */
 	luaL_newmetatable(L, EVENT_BASE_MT);
 	lua_newtable(L);
