@@ -11,7 +11,7 @@
 static le_buffer* event_buffer_get(lua_State* L, int idx) {
 	return (le_buffer*)luaL_checkudata(L, idx, EVENT_BUFFER_MT);
 }
-static void event_buffer_check(lua_State* L, int idx) {
+static le_buffer* event_buffer_check(lua_State* L, int idx) {
 	le_buffer* buf = (le_buffer*)luaL_checkudata(L, idx, EVENT_BUFFER_MT);
 	if(!buf->buffer)
 		luaL_argerror(L, idx, "Attempt to use closed event_buffer object");
@@ -58,7 +58,7 @@ static int event_buffer_add(lua_State* L) {
 	le_buffer* buf = event_buffer_check(L, 1);
 	struct evbuffer* buffer = buf->buffer;
 	int oldLength = EVBUFFER_LENGTH(buffer);
-	int last = lua_top(L);
+	int last = lua_gettop(L);
 	int i;
 	for(i = 2; i <= last; i++) {
 		if(!lua_isstring(L, i) && !is_event_buffer(L, i))
@@ -92,7 +92,7 @@ static int event_buffer_get_length(lua_State* L) {
 /* MAYBE: Could add caching */
 static int event_buffer_get_data(lua_State* L) {
 	le_buffer* buf = event_buffer_check(L, 1);
-	lua_pushlstring(L, EVBUFFER_DATA(buf->buffer), EVBUFFER_LENGTH(buf->buffer));
+	lua_pushlstring(L, (const char*)EVBUFFER_DATA(buf->buffer), EVBUFFER_LENGTH(buf->buffer));
 	return 1;
 }
 
@@ -111,7 +111,7 @@ static luaL_Reg buffer_funcs[] = {
 	{"close",event_buffer_gc},
 	{NULL, NULL}
 };
-static luaL_Ref funcs[] = {
+static luaL_Reg funcs[] = {
 	{"new",event_buffer_push_new},
 	{NULL, NULL}
 };
@@ -128,4 +128,3 @@ int event_buffer_register(lua_State* L) {
 	luaL_register(L, "luaevent.core.buffer", funcs);
 	return 0;
 }
- 
