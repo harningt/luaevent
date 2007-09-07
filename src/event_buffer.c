@@ -78,6 +78,8 @@ static int event_buffer_add(lua_State* L) {
 	for(i = 2; i <= last; i++) {
 		if(!lua_isstring(L, i) && !is_event_buffer(L, i))
 			luaL_argerror(L, i, "Argument is not a string or buffer object");
+		if(lua_equal(L, 1, i))
+			luaL_argerror(L, i, "Cannot add buffer to itself");
 /* Optionally perform checks and data loading separately to avoid overfilling the buffer */
 #if BUFFER_ADD_CHECK_INPUT_FIRST
 	}
