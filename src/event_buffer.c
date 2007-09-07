@@ -2,6 +2,7 @@
  * Licensed as LGPL - See doc/COPYING for details */
 
 #include "event_buffer.h"
+#include "luaevent.h"
 #include <lauxlib.h>
 #include <malloc.h>
 
@@ -169,6 +170,46 @@ static int event_buffer_drain(lua_State* L) {
 	return 0;
 }
 
+/* LUA: buffer:write
+	(integer/lightuserdata fd) - Attempts to write all the data out to the FD
+	(socket) - Attempts to write all the data out to the socket object
+*/
+static int event_buffer_write(lua_State* L) {
+	le_buffer* buf = event_buffer_check(L, 1);
+	int ret;
+	if(lua_isnumber(L, 2)) {
+		ret = evbuffer_write(buf->buffer, lua_tointeger(L, 2));
+	} else if(lua_islightuserdata(L, 2)) {
+		ret = evbuffer_write(buf->buffer, (int)(long)lua_touserdata(L, 2));
+	} else if(lua_isuserdata(L, 2)) {
+		ret = evbuffer_write(buf->buffer, getSocketFd(L, 2));
+	} else {
+		luaL_argerror(L, 2, "Unexpected data type.  Expects: integer/lightuserdata/socket");
+	}
+	lua_pushinteger(L, ret);
+	return 1;
+}
+
+/* LUA: buffer:read
+	(integer/lightuserdata fd, len) - Attempts to read up to 'len' out of the FD
+	(socket, len) - Attempts to read up to 'len' out of the socket object
+*/
+static int event_buffer_read(lua_State* L) {
+	le_buffer* buf = event_buffer_check(L, 1);
+	int len = luaL_checkinteger(L, 3);
+	int ret;
+	if(lua_isnumber(L, 2)) {
+		ret = evbuffer_read(buf->buffer, lua_tointeger(L, 2), len);
+	} else if(lua_islightuserdata(L, 2)) {
+		ret = evbuffer_read(buf->buffer, (int)(long)lua_touserdata(L, 2), len);
+	} else if(lua_isuserdata(L, 2)) {
+		ret = evbuffer_read(buf->buffer, getSocketFd(L, 2), len);
+	} else {
+		luaL_argerror(L, 2, "Unexpected data type.  Expects: integer/lightuserdata/socket");
+	}
+	lua_pushinteger(L, ret);
+	return 1;
+}
 static luaL_Reg buffer_funcs[] = {
 	{"add", event_buffer_add},
 	{"length", event_buffer_get_length},
@@ -176,6 +217,8 @@ static luaL_Reg buffer_funcs[] = {
 	{"readline", event_buffer_readline},
 	{"drain", event_buffer_drain},
 	{"close", event_buffer_gc},
+	{"read", event_buffer_read},
+	{"write", event_buffer_write},
 	{NULL, NULL}
 };
 static luaL_Reg funcs[] = {

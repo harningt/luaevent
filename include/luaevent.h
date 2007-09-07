@@ -15,6 +15,7 @@ typedef struct {
 
 le_base* event_base_get(lua_State* L, int idx);
 void load_timeval(double time, struct timeval *tv);
+int getSocketFd(lua_State* L, int idx);
 
 int luaopen_luaevent(lua_State* L);
 
