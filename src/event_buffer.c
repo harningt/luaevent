@@ -92,7 +92,30 @@ static int event_buffer_get_length(lua_State* L) {
 /* MAYBE: Could add caching */
 static int event_buffer_get_data(lua_State* L) {
 	le_buffer* buf = event_buffer_check(L, 1);
-	lua_pushlstring(L, (const char*)EVBUFFER_DATA(buf->buffer), EVBUFFER_LENGTH(buf->buffer));
+	int begin, len;
+	switch(lua_gettop(L)) {
+	case 1:
+		/* Obtain full data */
+		begin = 0;
+		len = EVBUFFER_LENGTH(buf->buffer);
+		break;
+	case 2:
+		begin = 0;
+		len = luaL_checkinteger(L, 2);
+		if(len > EVBUFFER_LENGTH(buf->buffer))
+			len = EVBUFFER_LENGTH(buf->buffer);
+		break;
+	case 3:
+	default:
+		begin = luaL_checkinteger(L, 2);
+		len = luaL_checkinteger(L, 3);
+		if(begin > EVBUFFER_LENGTH(buf->buffer))
+			begin = EVBUFFER_LENGTH(buf->buffer);
+		if(begin + len > EVBUFFER_LENGTH(buf->buffer))
+			len = EVBUFFER_LENGTH(buf->buffer) - begin;
+		break;
+	}
+	lua_pushlstring(L, (const char*)EVBUFFER_DATA(buf->buffer) + begin, len);
 	return 1;
 }
 
