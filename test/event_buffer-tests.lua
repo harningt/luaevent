@@ -112,6 +112,52 @@ function bufferTests:test_drain()
 		self.buffer:drain(5)
 	end)
 	testDataEqual("", self.buffer)
+	self.buffer:add("123456789")
+	testDataEqual("123456789", self.buffer)
+	assert_pass([[Should be able to apply negative draining to cause draining `all data`
+	(see source comments for why)]], function()
+		self.buffer:drain(-1)
+	end)
+	testDataEqual("", self.buffer)
+end
+
+function bufferTests:test_getPartial()
+	self.buffer:add("123456789")
+	assert_equal("1234", self.buffer:get_data(4))
+	assert_equal("1234", self.buffer:get_data(1,4))
+	assert_equal("5678", self.buffer:get_data(5,4))
+	assert_equal("5", self.buffer:get_data(5,1))
+	assert_equal("56789", self.buffer:get_data(5,100000000), "Data length is capped at max obtainable")
+	assert_equal("56789", self.buffer:get_data(5,-100), "Negative sizes capture entire remaining string")
+	assert_equal("9", self.buffer:get_data(-1, 1, "Negative position causes wraparound"))
+	assert_equal("89", self.buffer:get_data(-2,2, "Negative wraparound does not cause length inversion"))
+end
+
+local lineData = [[1
+2
+3]]
+local splitLineData = {
+	"1","2",nil
+}
+local mixedLineData = "1\r2\n3\r\n4\n\r5\r\r6\n\n7\r\n\r8\r\n\r9"
+local splitMixedLineData = {
+	"1","2","3","4","5","","6","","7","","8","", nil
+}
+function bufferTests:test_readline()
+	self.buffer:add(lineData)
+	testDataEqual(lineData, self.buffer)
+	for _, data in ipairs(splitLineData) do
+		assert_equal(data, self.buffer:readline())
+	end
+	testDataEqual("3", self.buffer, "Failed readline doesn't affect buffer contents")
+	self.buffer:drain(-1)
+	testDataEqual("", self.buffer)
+	self.buffer:add(mixedLineData)
+	testDataEqual(mixedLineData, self.buffer)
+	for _, data in ipairs(splitMixedLineData) do
+		assert_equal(data, self.buffer:readline())
+	end
+	testDataEqual("9", self.buffer)
 end
 
 lunit.run()
