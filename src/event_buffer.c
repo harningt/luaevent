@@ -117,6 +117,9 @@ static int event_buffer_get_length(lua_State* L) {
 	() - Returns all data in buffer
 	(len) - Returns data up to 'len' bytes long
 	(begin,len) - Returns data beginning at 'begin' up to 'len' bytes long
+	If begin < 0, wraps at data length
+		ex: (-1, 1) returns last character
+		(-2,2) returns last 2 chars [length meaning does not get inverted]
 */
 static int event_buffer_get_data(lua_State* L) {
 	le_buffer* buf = event_buffer_check(L, 1);
@@ -135,8 +138,18 @@ static int event_buffer_get_data(lua_State* L) {
 		break;
 	case 3:
 	default:
+		/* - 1 to map it to Lua's 1-based indexing
+		 * If begin < 0 add length to cause position wrapping
+		 */
 		begin = luaL_checkinteger(L, 2);
+		if(begin < 0)
+			begin += EVBUFFER_LENGTH(buf->buffer);
+		else
+			begin--;
 		len = luaL_checkinteger(L, 3);
+		/* If length is less than zero, capture entire remaining string */
+
+		if(len < 0) len = EVBUFFER_LENGTH(buf->buffer);
 		if(begin > EVBUFFER_LENGTH(buf->buffer))
 			begin = EVBUFFER_LENGTH(buf->buffer);
 		if(begin + len > EVBUFFER_LENGTH(buf->buffer))
@@ -150,7 +163,7 @@ static int event_buffer_get_data(lua_State* L) {
 /* LUA: buffer:readline()
 	Returns a line terminated by either '\r\n','\n\r' or '\r' or '\n'
 	Returns nil and leaves data alone if no terminator is found
-	TODO: Evaluate whether or not the newline is included
+	Newline is not present in the captured string.
 */
 static int event_buffer_readline(lua_State* L) {
 	le_buffer* buf = event_buffer_check(L, 1);
@@ -164,6 +177,8 @@ static int event_buffer_readline(lua_State* L) {
 
 /* LUA: buffer:drain(amt)
 	Drains 'amt' bytes from the buffer
+	If amt < 0, drains all data
+		(Due to auto-casting to unsigned int and automatic capping)
 */
 static int event_buffer_drain(lua_State* L) {
 	le_buffer* buf = event_buffer_check(L, 1);
