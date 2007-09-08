@@ -68,6 +68,7 @@ static int event_buffer_gc(lua_State* L) {
 	progressively adds items to the buffer
 		if arg[*] is string, treat as a string:format call
 		if arg[*] is a buffer, perform event_add_buffer
+	expects at least 1 other argument
 	returns number of bytes added
 */
 static int event_buffer_add(lua_State* L) {
@@ -76,6 +77,7 @@ static int event_buffer_add(lua_State* L) {
 	int oldLength = EVBUFFER_LENGTH(buffer);
 	int last = lua_gettop(L);
 	int i;
+	if(last == 1) luaL_error(L, "Not enough arguments to add: expects at least 1 additional operand");
 	for(i = 2; i <= last; i++) {
 		if(!lua_isstring(L, i) && !is_event_buffer(L, i))
 			luaL_argerror(L, i, "Argument is not a string or buffer object");
