@@ -257,5 +257,5 @@ int event_buffer_register(lua_State* L) {
 	lua_pop(L, 1);
 	
 	luaL_register(L, "luaevent.core.buffer", funcs);
-	return 0;
+	return 1;
 }
