@@ -18,7 +18,7 @@ static le_buffer* event_buffer_get(lua_State* L, int idx) {
 /* Obtains an le_buffer structure from a given index
 	AND checks that it hadn't been prematurely freed
 */
-static le_buffer* event_buffer_check(lua_State* L, int idx) {
+le_buffer* event_buffer_check(lua_State* L, int idx) {
 	le_buffer* buf = (le_buffer*)luaL_checkudata(L, idx, EVENT_BUFFER_MT);
 	if(!buf->buffer)
 		luaL_argerror(L, idx, "Attempt to use closed event_buffer object");
@@ -26,7 +26,7 @@ static le_buffer* event_buffer_check(lua_State* L, int idx) {
 }
 
 /* Checks if the given index contains an le_buffer object */
-static int is_event_buffer(lua_State* L, int idx) {
+int is_event_buffer(lua_State* L, int idx) {
 	int ret;
 	lua_getmetatable(L, idx);
 	luaL_getmetatable(L, EVENT_BUFFER_MT);
@@ -37,7 +37,7 @@ static int is_event_buffer(lua_State* L, int idx) {
 
 /* TODO: Use lightuserdata mapping to locate hanging object instances */
 /* Pushes the specified evbuffer object onto the stack, attaching a metatable to it */
-static int event_buffer_push(lua_State* L, struct evbuffer* buffer) {
+int event_buffer_push(lua_State* L, struct evbuffer* buffer) {
 	le_buffer *buf = (le_buffer*)lua_newuserdata(L, sizeof(le_buffer));
 	buf->buffer = buffer;
 	luaL_getmetatable(L, EVENT_BUFFER_MT);
