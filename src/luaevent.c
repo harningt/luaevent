@@ -4,6 +4,7 @@
 #include "luaevent.h"
 #include "event_callback.h"
 #include "event_buffer.h"
+#include "buffer_event.h"
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -121,6 +122,8 @@ int luaopen_luaevent_core(lua_State* L) {
 	/* Register external items */
 	event_callback_register(L);
 	event_buffer_register(L);
+	buffer_event_register(L);
+	lua_settop(L, 0);
 	/* Setup metatable */
 	luaL_newmetatable(L, EVENT_BASE_MT);
 	lua_newtable(L);
