@@ -1,4 +1,4 @@
-0.2.0 - 2007-*-*
+0.2.0 - 2007-09-21
  + Reorganized project to better fit GIT
  + Refactored and cleaned sources
    * Broke event_callback into its own source file
