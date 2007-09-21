@@ -1,6 +1,5 @@
 /* LuaEvent - Copyright (C) 2007 Thomas Harning <harningt@gmail.com>
  * Licensed as LGPL - See doc/COPYING for details */
- 
 #include "buffer_event.h"
 #include "luaevent.h"
 #include "utility.h"
@@ -85,7 +84,7 @@ static int buffer_event_push(lua_State* L) {
 	lua_rawseti(L, -2, 2); // Write
 	lua_pushvalue(L, 5);
 	lua_rawseti(L, -2, 3); // Err
-	
+
 	event_buffer_push(L, ev->ev->input);
 	lua_rawseti(L, -2, 4);
 	event_buffer_push(L, ev->ev->output);
@@ -104,7 +103,7 @@ static int buffer_event_gc(lua_State* L) {
 		le_buffer *read, *write;
 		bufferevent_free(ev->ev);
 		ev->ev = NULL;
-		/* Also clear out the associated input/output event_buffers 
+		/* Also clear out the associated input/output event_buffers
 		 * since they would have already been freed.. */
 		lua_getfenv(L, 1);
 		lua_rawgeti(L, -1, 4);
@@ -135,7 +134,7 @@ int buffer_event_register(lua_State* L) {
 	luaL_register(L, NULL, buffer_event_funcs);
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
-	
+
 	luaL_register(L, "luaevent.core.bufferevent", funcs);
 	return 1;
 }
