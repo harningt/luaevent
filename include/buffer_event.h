@@ -1,7 +1,7 @@
 /* LuaEvent - Copyright (C) 2007 Thomas Harning <harningt@gmail.com>
  * Licensed as LGPL - See doc/COPYING for details */
- #ifndef BUFFER_EVENT_H
- #define BUFFER_EVENT_H
+#ifndef BUFFER_EVENT_H
+#define BUFFER_EVENT_H
  
 #include "luaevent.h"
 #include <lua.h>
