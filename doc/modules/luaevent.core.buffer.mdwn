@@ -27,17 +27,16 @@ Functions:
 
 ## buffer:read
 * Reads data from a file-descriptor/socket into the buffer directly
-* Input: `(integer/lightuserdata fd OR socket, length)`
-	* `fd` - File descriptor as integer or lightuserdata 'handle' (cast to a native integer)
-	* `socket` - [LuaSocket](http://www.luaforge.net/projects/luasocket)-based socket handle
+* Input: `(fd, length)`
+	* `fd` - File descriptor to read from
 	* `length` - Amount of data to attempt to read into the buffer
 * Output: Length of data actually read into the buffer
 * Side Effects: fd/socket 'drain'ed of data
 
 ## buffer:write
 * Attempts to write out all buffer's data to a file-descriptor/socket
-* Input: `(integer/lightuserdata fd OR socket, length)`
-	* `fd` - File descriptor as integer or lightuserdata 'handle' (cast to a native integer)
+* Input: `(fd, length)`
+	* `fd` - File descriptor to write to
 	* `socket` - [LuaSocket](http://www.luaforge.net/projects/luasocket)-based socket handle
 * Output: Amount of data written
 * Side Effects: buffer 'drain'ed of written data
