@@ -1,0 +1,28 @@
+----
+Functions:
+
+[[toc levels=1]]
+
+## Read/Write/Error Callback:
+* Input: `(bufferevent, what)`
+	* `bufferevent` - Reference to the bufferevent that raised the callback
+	* `what` - What happened:
+		* == `EVBUFFER_READ` - Buffer contains at least low-watermark length and no more than high-watermark length
+		* == `EVBUFFER_WRITE` - Buffer ready to write to
+		* (other) - Error condition
+			* May be or-ed/added with `EVBUFFER_READ`/`EVBUFFER_WRITE` to specify where it happened
+			* `EVBUFFER_ERROR` - Marks error condition (need to look at 'errno' for error.. not exposed yet)
+			* `EVBUFFER_TIMEOUT` - Marks activity timeout
+			* `EVBUFFER_EOF` - Marks disconnection/end-of-file condition
+
+## bufferevent.new
+* Input: `(fd, read, write, error)`
+	* `fd` - File descriptor to watch
+	* `read` - (may be nil) - callback to call when data in buffer is above the low watermark
+	* `write` - (may be nil) - callback to call when the output buffer contains less data than the low watermark
+	* `error` - callback to call when there is an erroneous condition
+
+## bufferevent (__gc)
+* Releases the bufferevent
+	* Disconnects event buffers since they were owned by the bufferevent object in 'C' land
+	* Disconnects all references so that any erroneous callbacks don't cause failures
