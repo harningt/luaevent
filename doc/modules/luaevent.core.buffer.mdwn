@@ -14,10 +14,10 @@ Functions:
 * Output: Amount of data added
 (QUESTION: Should add return the buffer itself so that chaining can be easy)
 
-## buffer:length (`__len`)
+## buffer:length (__len)
 * Output: Length of the remaining buffer contents
 
-## buffer:get\_data (`__tostring`)
+## buffer:get\_data (__tostring)
 * Input:
 	* `()` and `__tostring` - Returns all data in the buffer
 	* `(len)` - Returns data up to `len` bytes long
@@ -56,5 +56,5 @@ potential later data would contain the paired '\n' or '\r'. (TODO: Ask libevent 
 	TODO: Add code to check this condition explicitly for safety
 	* If `amt >= 0`, drain up to amt from the buffer (no problem w/ too-large values)
 
-## buffer:close (`__gc`)
+## buffer:close (__gc)
 * Immediately frees/closes a buffer.  Note that 

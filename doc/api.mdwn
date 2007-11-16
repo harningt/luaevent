@@ -9,6 +9,7 @@ Modules:
 * [[modules/luaevent]] - Higher level wrapper mimicking [copas](http://www.luaforge.net/projects/copas)
 
 Note: Any reference to a "File Descriptor" may in fact be one of the following:
+
 * Integer value of file descriptor
 * lightuserdata 'handle' (cast to a native integer)
 * [LuaSocket](http://www.luaforge.net/projects/luasocket)-based socket handle
