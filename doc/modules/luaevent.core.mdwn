@@ -1,0 +1,17 @@
+----
+Constants:
+
+* `LEAVE` - When returned will cause event callback to be cancelled
+* `EV_READ`
+* `EV_WRITE`
+* `EV_TIMEOUT`
+* `EVBUFFER_READ`
+* `EVBUFFER_WRITE`
+* `EVBUFFER_EOF`
+* `EVBUFFER_ERROR`
+* `EVBUFFER_TIMEOUT`
+
+Functions:
+
+[[toc levels=1]]
+
