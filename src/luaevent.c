@@ -106,6 +106,8 @@ static namedInteger consts[] = {
 	{"EV_READ", EV_READ},
 	{"EV_WRITE", EV_WRITE},
 	{"EV_TIMEOUT", EV_TIMEOUT},
+	{"EV_SIGNAL", EV_SIGNAL},
+	{"EV_PERSIST", EV_PERSIST},
 	/* bufferevent */
 	{"EVBUFFER_READ", EVBUFFER_READ},
 	{"EVBUFFER_WRITE", EVBUFFER_WRITE},
