@@ -23,12 +23,45 @@ Constants:
 	  For example: `EV_READ` | `EV_TIMEOUT` means that a timeout
 	  occurred while waiting for a read event.
 * `EVBUFFER_READ`
+	* Marks that the input buffer has data available > low watermark
 * `EVBUFFER_WRITE`
+	* Marks that the output buffer level is below low watermark
 * `EVBUFFER_EOF`
+	* Received tagged with either read/write based on location received in the error callback
 * `EVBUFFER_ERROR`
+	* An error occurred (tagged w/ either read/write) and the error is in `errno`
 * `EVBUFFER_TIMEOUT`
+	* A timeout occurred (tagged w/ either read/write)
 
 Functions:
 
 [[toc levels=1]]
 
+## luaevent.core.new
+* Allocates a new event 'core' (`event base`)
+
+## event_callback fn
+* Input: `(event)`
+* Output: `(newEvent, [newTimeout])`
+	* `newEvent` - New event to register, typically `LEAVE`, `EV_READ`, `EV_WRITE`, or `EV_READ`|`EV_WRITE`
+	* `newTimeout` - New timeout value to use
+
+## core:addevent
+* Adds a new event to the eventloop
+* Input: `(fd, event, event_callback, [timeout])`
+	* `fd` - File descriptor to read from / or NIL for pure timeout event
+	* `event` - `EV_*` flagset to mark what events to capture
+		* `EV_SIGNAL` and `EV_PERSIST` is unavailable currently
+		* `EV_PERSIST` is used internally.
+	* `event_callback` - Callback to call... (see above)
+	* `timeout` - Time in seconds to timeout (decimal values supported)
+* Output: `event_callback` object
+	* Has a `close` and `__gc` FN which will erase the callback, 
+	  so preserve this until done.
+
+## core:loop
+* Begins the event loop and doesn't return until there are no events left
+
+## core:close (__gc)
+* Closes the event base
+* Do not allow this to be called while `core:loop` is running
