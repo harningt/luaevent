@@ -42,3 +42,11 @@ Functions:
 * Input: `(low, high)`
 	* `low` - When buffer is below this, the event will be fired
 	* `high` - N/A to libevent, user app may use this
+
+## bufferevent:get_read_watermarks
+* Output: `low, high`
+* See `set_read_watermarks`
+
+## bufferevent:get_write_watermarks
+* Output: `low, high`
+* See `set_write_watermarks`

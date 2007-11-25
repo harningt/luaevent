@@ -167,11 +167,31 @@ static int buffer_event_set_write_watermarks(lua_State* L) {
 	return 0;
 }
 
+static int buffer_event_get_read_watermarks(lua_State* L) {
+	le_bufferevent* ev = buffer_event_get(L, 1);
+	if(!ev->ev) return 0;
+
+	lua_pushinteger(L, ev->ev->wm_read.low);
+	lua_pushinteger(L, ev->ev->wm_read.high);
+	return 2;
+}
+
+static int buffer_event_get_write_watermarks(lua_State* L) {
+	le_bufferevent* ev = buffer_event_get(L, 1);
+	if(!ev->ev) return 0;
+
+	lua_pushinteger(L, ev->ev->wm_write.low);
+	lua_pushinteger(L, ev->ev->wm_write.high);
+	return 2;
+}
+
 static luaL_Reg buffer_event_funcs[] = {
 	{"get_read", buffer_event_get_read},
 	{"get_write", buffer_event_get_write},
 	{"set_read_watermarks", buffer_event_set_read_watermarks},
 	{"set_write_watermarks", buffer_event_set_write_watermarks},
+	{"get_read_watermarks", buffer_event_get_read_watermarks},
+	{"get_write_watermarks", buffer_event_get_write_watermarks},
 	{NULL, NULL}
 };
 
