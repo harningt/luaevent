@@ -141,9 +141,37 @@ static int buffer_event_get_write(lua_State* L) {
 	return 1;
 }
 
+static int buffer_event_set_read_watermarks(lua_State* L) {
+	int low, high;
+	le_bufferevent* ev = buffer_event_get(L, 1);
+	if(!ev->ev) return 0;
+
+	low = lua_tonumber(L, 2);
+	high = lua_tonumber(L, 3);
+
+	ev->ev->wm_read.low = low;
+	ev->ev->wm_read.high = high;
+	return 0;
+}
+
+static int buffer_event_set_write_watermarks(lua_State* L) {
+	int low, high;
+	le_bufferevent* ev = buffer_event_get(L, 1);
+	if(!ev->ev) return 0;
+
+	low = lua_tonumber(L, 2);
+	high = lua_tonumber(L, 3);
+
+	ev->ev->wm_write.low = low;
+	ev->ev->wm_write.high = high;
+	return 0;
+}
+
 static luaL_Reg buffer_event_funcs[] = {
 	{"get_read", buffer_event_get_read},
 	{"get_write", buffer_event_get_write},
+	{"set_read_watermarks", buffer_event_set_read_watermarks},
+	{"set_write_watermarks", buffer_event_set_write_watermarks},
 	{NULL, NULL}
 };
 
