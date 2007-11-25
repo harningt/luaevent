@@ -127,7 +127,23 @@ static int buffer_event_gc(lua_State* L) {
 	return 0;
 }
 
+static int buffer_event_get_read(lua_State* L) {
+	(void)buffer_event_get(L, 1);
+	lua_getfenv(L, 1);
+	lua_rawgeti(L, -1, READ_BUFFER_LOCATION);
+	return 1;
+}
+
+static int buffer_event_get_write(lua_State* L) {
+	(void)buffer_event_get(L, 1);
+	lua_getfenv(L, 1);
+	lua_rawgeti(L, -1, WRITE_BUFFER_LOCATION);
+	return 1;
+}
+
 static luaL_Reg buffer_event_funcs[] = {
+	{"get_read", buffer_event_get_read},
+	{"get_write", buffer_event_get_write},
 	{NULL, NULL}
 };
 
