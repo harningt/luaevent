@@ -32,3 +32,13 @@ Functions:
 
 ## bufferevent:get_write
 * Obtains the output buffer associated w/ the bufferevent
+
+## bufferevent:set_read_watermarks
+* Input: `(low, high)`
+	* `low` - Size of buffer at which an event would be fired
+	* `high` - Maximum size of buffer to read to
+
+## bufferevent:set_write_watermarks
+* Input: `(low, high)`
+	* `low` - When buffer is below this, the event will be fired
+	* `high` - N/A to libevent, user app may use this
