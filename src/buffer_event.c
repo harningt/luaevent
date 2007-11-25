@@ -49,7 +49,7 @@ static void handle_callback(le_bufferevent* le_ev, short what, int callbackIndex
 	/* func, bufferevent */
 	lua_pushinteger(L, what);
 	/* What to do w/ errors...? */
-	lua_pcall(L, 3, 0, 0);
+	lua_pcall(L, 2, 0, 0);
 }
 
 static void buffer_event_readcb(struct bufferevent *ev, void *ptr) {
