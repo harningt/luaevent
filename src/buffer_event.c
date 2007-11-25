@@ -114,6 +114,12 @@ static int buffer_event_gc(lua_State* L) {
 		lua_rawgeti(L, -2, WRITE_BUFFER_LOCATION);
 		read = event_buffer_check(L, -2);
 		write = event_buffer_check(L, -1);
+		/* Erase Lua's link to the buffers */
+		lua_pushnil(L);
+		/* LS: ..., fenv, readBuf, writeBuf, nil */
+		lua_rawseti(L, -4, READ_BUFFER_LOCATION);
+		lua_pushnil(L);
+		lua_rawseti(L, -4, WRITE_BUFFER_LOCATION);
 		/* Erase their knowledge of the buffer so that the GC won't try to double-free */
 		read->buffer = NULL;
 		write->buffer = NULL;
