@@ -26,3 +26,9 @@ Functions:
 * Releases the bufferevent
 	* Disconnects event buffers since they were owned by the bufferevent object in 'C' land
 	* Disconnects all references so that any erroneous callbacks don't cause failures
+
+## bufferevent:get_read
+* Obtains the input buffer associated w/ the bufferevent
+
+## bufferevent:get_write
+* Obtains the output buffer associated w/ the bufferevent
