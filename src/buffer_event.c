@@ -9,6 +9,10 @@
 
 #define BUFFER_EVENT_MT "BUFFER_EVENT_MT"
 
+/* Locations of READ/WRITE buffers in the fenv */
+#define READ_BUFFER_LOCATION 4
+#define WRITE_BUFFER_LOCATION 5
+
 /* Obtains an le_bufferevent structure from a given index */
 static le_bufferevent* buffer_event_get(lua_State* L, int idx) {
 	return (le_bufferevent*)luaL_checkudata(L, idx, BUFFER_EVENT_MT);
@@ -86,9 +90,9 @@ static int buffer_event_push(lua_State* L) {
 	lua_rawseti(L, -2, 3); // Err
 
 	event_buffer_push(L, ev->ev->input);
-	lua_rawseti(L, -2, 4);
+	lua_rawseti(L, -2, READ_BUFFER_LOCATION);
 	event_buffer_push(L, ev->ev->output);
-	lua_rawseti(L, -2, 5);
+	lua_rawseti(L, -2, WRITE_BUFFER_LOCATION);
 	lua_setfenv(L, -2);
 	ev->base = base;
 	return 1;
@@ -106,8 +110,8 @@ static int buffer_event_gc(lua_State* L) {
 		/* Also clear out the associated input/output event_buffers
 		 * since they would have already been freed.. */
 		lua_getfenv(L, 1);
-		lua_rawgeti(L, -1, 4);
-		lua_rawgeti(L, -2, 5);
+		lua_rawgeti(L, -1, READ_BUFFER_LOCATION);
+		lua_rawgeti(L, -2, WRITE_BUFFER_LOCATION);
 		read = event_buffer_check(L, -2);
 		write = event_buffer_check(L, -1);
 		/* Erase their knowledge of the buffer so that the GC won't try to double-free */
