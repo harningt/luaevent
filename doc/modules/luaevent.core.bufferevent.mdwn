@@ -60,3 +60,8 @@ Functions:
 ## bufferevent:get_timeouts
 * Output: `read, write`
 * See `set_timeouts`
+
+## bufferevent:enable/disable
+* Input: `event flag`
+	* `event flag` - `EV_READ`, `EV_WRITE`, or `EV_READ|EV_WRITE`
+* Enables/Disables events from being triggered in the next round (some events may get triggered after disable is called)
