@@ -206,6 +206,22 @@ static int buffer_event_get_timeouts(lua_State* L) {
 	return 2;
 }
 
+static int buffer_event_enable(lua_State* L) {
+	le_bufferevent* ev = buffer_event_get(L, 1);
+	if(!ev->ev) return 0;
+
+	lua_pushinteger(L, bufferevent_enable(ev->ev, luaL_checkinteger(L, 2)));
+	return 1;
+}
+
+static int buffer_event_disable(lua_State* L) {
+	le_bufferevent* ev = buffer_event_get(L, 1);
+	if(!ev->ev) return 0;
+
+	lua_pushinteger(L, bufferevent_disable(ev->ev, luaL_checkinteger(L, 2)));
+	return 1;
+}
+
 static luaL_Reg buffer_event_funcs[] = {
 	{"get_read", buffer_event_get_read},
 	{"get_write", buffer_event_get_write},
@@ -215,6 +231,8 @@ static luaL_Reg buffer_event_funcs[] = {
 	{"get_write_watermarks", buffer_event_get_write_watermarks},
 	{"set_timeouts", buffer_event_set_timeouts},
 	{"get_timeouts", buffer_event_get_timeouts},
+	{"enable", buffer_event_enable},
+	{"disable", buffer_event_disable},
 	{NULL, NULL}
 };
 
