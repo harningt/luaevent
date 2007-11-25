@@ -50,3 +50,13 @@ Functions:
 ## bufferevent:get_write_watermarks
 * Output: `low, high`
 * See `set_write_watermarks`
+
+## bufferevent:set_timeouts
+* Sets timeouts for the bufferevent's events
+* Input: `(read, write)`
+	* `read` - Read readiness timeout
+	* `write` - Write readiness timeout
+
+## bufferevent:get_timeouts
+* Output: `read, write`
+* See `set_timeouts`

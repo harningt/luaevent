@@ -185,6 +185,27 @@ static int buffer_event_get_write_watermarks(lua_State* L) {
 	return 2;
 }
 
+static int buffer_event_set_timeouts(lua_State* L) {
+	int timeout_read, timeout_write;
+	le_bufferevent* ev = buffer_event_get(L, 1);
+	if(!ev->ev) return 0;
+
+	timeout_read = lua_tointeger(L, 2);
+	timeout_write = lua_tointeger(L, 3);
+
+	bufferevent_settimeout(ev->ev, timeout_read, timeout_write);
+	return 0;
+}
+
+static int buffer_event_get_timeouts(lua_State* L) {
+	le_bufferevent* ev = buffer_event_get(L, 1);
+	if(!ev->ev) return 0;
+
+	lua_pushinteger(L, ev->ev->timeout_read);
+	lua_pushinteger(L, ev->ev->timeout_write);
+	return 2;
+}
+
 static luaL_Reg buffer_event_funcs[] = {
 	{"get_read", buffer_event_get_read},
 	{"get_write", buffer_event_get_write},
@@ -192,6 +213,8 @@ static luaL_Reg buffer_event_funcs[] = {
 	{"set_write_watermarks", buffer_event_set_write_watermarks},
 	{"get_read_watermarks", buffer_event_get_read_watermarks},
 	{"get_write_watermarks", buffer_event_get_write_watermarks},
+	{"set_timeouts", buffer_event_set_timeouts},
+	{"get_timeouts", buffer_event_get_timeouts},
 	{NULL, NULL}
 };
 
