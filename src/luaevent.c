@@ -11,6 +11,10 @@
 
 #define EVENT_BASE_MT "EVENT_BASE_MT"
 
+#ifdef _WIN32
+#include <winsock2.h>
+#endif
+
 le_base* event_base_get(lua_State* L, int idx) {
 	return (le_base*)luaL_checkudata(L, idx, EVENT_BASE_MT);
 }
@@ -118,6 +122,12 @@ void setNamedIntegers(lua_State* L, namedInteger* p) {
 
 /* Verified ok */
 int luaopen_luaevent_core(lua_State* L) {
+#ifdef _WIN32
+	WORD wVersionRequested = MAKEWORD(2, 2);
+	WSADATA wsaData;
+	WSAStartup(wVersionRequested, &wsaData);
+#endif
+	event_init( );
 	/* Register external items */
 	event_callback_register(L);
 	event_buffer_register(L);
@@ -134,3 +144,4 @@ int luaopen_luaevent_core(lua_State* L) {
 	setNamedIntegers(L, consts);
 	return 1;
 }
+
