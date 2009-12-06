@@ -89,9 +89,18 @@ static int luaevent_loop(lua_State* L) {
 	return 1;
 }
 
+static int luaevent_loopexit(lua_State*L) {
+	le_base *base = event_base_get(L, 1);
+	struct timeval tv = { 0, 10 };
+	int ret = event_base_loopexit(base->base, &tv);
+	lua_pushinteger(L, ret);
+	return 1;
+}
+
 static luaL_Reg base_funcs[] = {
 	{ "addevent", luaevent_addevent },
 	{ "loop", luaevent_loop },
+	{ "loopexit", luaevent_loopexit },
 	{ NULL, NULL }
 };
 
