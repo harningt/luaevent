@@ -5,6 +5,9 @@
 module("luaevent", package.seeall)
 require("luaevent.core")
 
+_NAME = "luaevent";
+_VERSION = "0.3 dev";
+
 local EV_READ = luaevent.core.EV_READ
 local EV_WRITE = luaevent.core.EV_WRITE
 local base = luaevent.core.new()
