@@ -29,6 +29,11 @@ int luaevent_newbase(lua_State* L) {
 	return 1;
 }
 
+int luaevent_libevent_version(lua_State* L) {
+	lua_pushstring(L, event_get_version());
+	return 1;
+}
+
 static int luaevent_base_gc(lua_State* L) {
 	le_base *base = event_base_get(L, 1);
 	if(base->base) {
@@ -115,6 +120,7 @@ static luaL_Reg base_funcs[] = {
 
 static luaL_Reg funcs[] = {
 	{ "new", luaevent_newbase },
+	{ "libevent_version", luaevent_libevent_version },
 	{ NULL, NULL }
 };
 
