@@ -99,10 +99,17 @@ static int luaevent_loopexit(lua_State*L) {
 	return 1;
 }
 
+static int luaevent_method(lua_State* L) {
+	le_base *base = event_base_get(L, 1);
+	lua_pushstring(L, event_base_get_method(base->base));
+	return 1;
+}
+
 static luaL_Reg base_funcs[] = {
 	{ "addevent", luaevent_addevent },
 	{ "loop", luaevent_loop },
 	{ "loopexit", luaevent_loopexit },
+	{ "method", luaevent_method },
 	{ NULL, NULL }
 };
 
