@@ -91,7 +91,9 @@ static int luaevent_loop(lua_State* L) {
 
 static int luaevent_loopexit(lua_State*L) {
 	le_base *base = event_base_get(L, 1);
-	struct timeval tv = { 0, 10 };
+	struct timeval tv = { 0, 0 };
+	if(lua_gettop(L) >= 2) /* Optional timeout before exiting the loop */
+		load_timeval(luaL_checknumber(L, 2), &tv);
 	int ret = event_base_loopexit(base->base, &tv);
 	lua_pushinteger(L, ret);
 	return 1;
