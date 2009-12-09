@@ -45,14 +45,18 @@ static int luaevent_base_gc(lua_State* L) {
 
 int getSocketFd(lua_State* L, int idx) {
 	int fd;
-	luaL_checktype(L, idx, LUA_TUSERDATA);
-	lua_getfield(L, idx, "getfd");
-	if(lua_isnil(L, -1))
-		return luaL_error(L, "Socket type missing 'getfd' method");
-	lua_pushvalue(L, idx);
-	lua_call(L, 1, 1);
-	fd = lua_tointeger(L, -1);
-	lua_pop(L, 1);
+	if(lua_isnumber(L, idx)) {
+		fd = lua_tonumber(L, idx);
+	} else {
+		luaL_checktype(L, idx, LUA_TUSERDATA);
+		lua_getfield(L, idx, "getfd");
+		if(lua_isnil(L, -1))
+			return luaL_error(L, "Socket type missing 'getfd' method");
+		lua_pushvalue(L, idx);
+		lua_call(L, 1, 1);
+		fd = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+	}
 	return fd;
 }
 
