@@ -5,7 +5,11 @@
 
 #include <lua.h>
 #include <sys/types.h>
+#ifdef _WIN32
+#include <winsock2.h>
+#else
 #include <sys/time.h>
+#endif
 #include <event.h>
 
 typedef struct {
