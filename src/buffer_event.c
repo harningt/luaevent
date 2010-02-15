@@ -1,7 +1,6 @@
 /* LuaEvent - Copyright (C) 2007 Thomas Harning <harningt@gmail.com>
  * Licensed as LGPL - See doc/COPYING for details */
 #include "buffer_event.h"
-#include "luaevent.h"
 #include "utility.h"
 #include <lauxlib.h>
 #include <malloc.h>
