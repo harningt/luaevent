@@ -4,10 +4,6 @@
 #define BUFFER_EVENT_H
  
 #include "luaevent.h"
-#include <lua.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <event.h>
 
 typedef struct {
 	struct bufferevent* ev;
