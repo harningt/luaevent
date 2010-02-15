@@ -1,3 +1,13 @@
+luaevent-prosody is a (hopefully temporary) fork of the luaevent library. This fork is
+maintained by Matthew Wild <mwild1@gmail.com>.
+
+Source repository: http://code.matthewwild.co.uk/luaevent-prosody
+
+This luaevent-prosody 0.1.0 release is based on luaevent 0.2.0. See CHANGELOG for more 
+information about the changes.
+
+=== Original README from luaevent 0.2.0 ===
+
 Description: This is a binding of libevent to Lua. It will serve as a drop-in replacement 
 for copas, and eventually support more features (async DNS, HTTP, RPC...).
 
