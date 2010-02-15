@@ -4,8 +4,8 @@ INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
 
 # Flags
-CFLAGS = -g -O0 -c -Wall -fpic
-LDFLAGS = -g -shared
+CFLAGS = -O3 -c -Wall -fpic
+LDFLAGS = -shared
 
 # Directories
 LUA_INC_DIR=/usr/include/lua5.1
