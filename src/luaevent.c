@@ -7,6 +7,7 @@
 
 #include <lauxlib.h>
 #include <assert.h>
+#include <string.h>
 
 #define EVENT_BASE_MT "EVENT_BASE_MT"
 
@@ -105,8 +106,13 @@ static int luaevent_loopexit(lua_State*L) {
 }
 
 static int luaevent_method(lua_State* L) {
+	#ifdef _EVENT_VERSION
 	le_base *base = event_base_get(L, 1);
-	lua_pushstring(L, event_base_get_method(base->base));
+	if(strcmp(_EVENT_VERSION, "1.3")<0)
+		lua_pushstring(L, event_base_get_method(base->base));
+	else
+	#endif
+		lua_pushstring(L, event_get_method());
 	return 1;
 }
 
