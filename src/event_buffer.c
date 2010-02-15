@@ -200,6 +200,7 @@ static int event_buffer_write(lua_State* L) {
 	} else if(lua_isuserdata(L, 2)) {
 		ret = evbuffer_write(buf->buffer, getSocketFd(L, 2));
 	} else {
+		ret = 0; /* Shush uninitialized warning */
 		luaL_argerror(L, 2, "Unexpected data type.  Expects: integer/lightuserdata/socket");
 	}
 	lua_pushinteger(L, ret);
@@ -221,6 +222,7 @@ static int event_buffer_read(lua_State* L) {
 	} else if(lua_isuserdata(L, 2)) {
 		ret = evbuffer_read(buf->buffer, getSocketFd(L, 2), len);
 	} else {
+		ret = 0; /* Shush uninitialized warning */
 		luaL_argerror(L, 2, "Unexpected data type.  Expects: integer/lightuserdata/socket");
 	}
 	lua_pushinteger(L, ret);
