@@ -1,3 +1,15 @@
+luaevent-prosody 0.1.0 - 2010-02-15
+ * Fixed stack slot leak in event callbacks
+ * Fixed stack slot leak when error occurs in callback
+ * Various compilation fixes for Windows/ANSI C
+ * Silence some compiler warnings
+ + Add base:loopexit() method, with timeout support
+ + Add base:method() to discover backend in use
+ + Add core.libevent_version() to detect libevent version
+ + Add _NAME and _VERSION fields to module table
+ + base:addevent() now accepts integer fd to watch
+ + Switched from premake to standard Makefile for building
+======
 0.2.0 - 2007-09-21
  + Reorganized project to better fit GIT
  + Refactored and cleaned sources
