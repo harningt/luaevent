@@ -1,20 +1,14 @@
 /* LuaEvent - Copyright (C) 2007 Thomas Harning <harningt@gmail.com>
  * Licensed as LGPL - See doc/COPYING for details */
 
-#include "luaevent.h"
 #include "event_callback.h"
 #include "event_buffer.h"
 #include "buffer_event.h"
 
-#include <lua.h>
 #include <lauxlib.h>
 #include <assert.h>
 
 #define EVENT_BASE_MT "EVENT_BASE_MT"
-
-#ifdef _WIN32
-#include <winsock2.h>
-#endif
 
 le_base* event_base_get(lua_State* L, int idx) {
 	return (le_base*)luaL_checkudata(L, idx, EVENT_BASE_MT);

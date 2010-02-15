@@ -2,7 +2,6 @@
  * Licensed as LGPL - See doc/COPYING for details */
 
 #include "event_buffer.h"
-#include "luaevent.h"
 #include <lauxlib.h>
 #include <malloc.h>
 
