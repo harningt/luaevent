@@ -56,8 +56,8 @@ int getSocketFd(lua_State* L, int idx) {
 }
 
 void load_timeval(double time, struct timeval *tv) {
-	tv->tv_sec = (int)time;
-	tv->tv_usec = (int)(time * 1000000) % 1000000;
+	tv->tv_sec = (int) time;
+	tv->tv_usec = (int)( (time - tv->tv_sec) * 1000000 );
 }
 
 /* sock, event, callback, timeout */
