@@ -3,7 +3,7 @@ maintained by Matthew Wild <mwild1@gmail.com>.
 
 Source repository: http://code.matthewwild.co.uk/luaevent-prosody
 
-This luaevent-prosody 0.1.0 release is based on luaevent 0.2.0. See CHANGELOG for more 
+This luaevent-prosody 0.1.1 release is based on luaevent 0.2.0. See CHANGELOG for more 
 information about the changes.
 
 NOTE: This version of luaevent-prosody depends on the *1.4* branch of libevent - 1.3 can
