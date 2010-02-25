@@ -6,6 +6,10 @@ Source repository: http://code.matthewwild.co.uk/luaevent-prosody
 This luaevent-prosody 0.1.0 release is based on luaevent 0.2.0. See CHANGELOG for more 
 information about the changes.
 
+NOTE: This version of luaevent-prosody depends on the *1.4* branch of libevent - 1.3 can
+      link but will produce erratic behaviour at runtime. I intend to look into this,
+      but don't have time right now - patches welcome.
+
 === Original README from luaevent 0.2.0 ===
 
 Description: This is a binding of libevent to Lua. It will serve as a drop-in replacement 
