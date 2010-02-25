@@ -4,7 +4,7 @@ INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
 
 # Flags
-CFLAGS = -O3 -c -Wall -fpic
+CFLAGS = -O2 -c -Wall -fpic
 LDFLAGS = -shared
 
 # Directories
