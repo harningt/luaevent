@@ -23,8 +23,10 @@ all:
 	$(CC) $(LDFLAGS) -o $(LIB) *.o -L$(LUA_LIB_DIR) -l$(LUA_LIB) -levent
 
 install: all
-	$(INSTALL_DATA) -D lua/luaevent.lua $(DESTDIR)$(INSTALL_DIR_LUA)/luaevent.lua
-	$(INSTALL_PROGRAM) -D $(LIB) $(DESTDIR)$(INSTALL_DIR_BIN)/luaevent/$(LIB)
+	mkdir -p $(DESTDIR)$(INSTALL_DIR_LUA)
+	$(INSTALL_DATA) lua/luaevent.lua $(DESTDIR)$(INSTALL_DIR_LUA)/luaevent.lua
+	mkdir -p $(DESTDIR)$(INSTALL_DIR_BIN)/luaevent/
+	$(INSTALL_PROGRAM) $(LIB) $(DESTDIR)$(INSTALL_DIR_BIN)/luaevent/$(LIB)
 
 clean:
 	rm *.so
