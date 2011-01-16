@@ -13,9 +13,9 @@ GIT Repositories:
 	See: https://github.com/harningt/luaevent
 
 Build Requirements:
-	libevent (recommend >= 1.3b)
+	libevent (recommend >= 1.4)
 Usage Requirements:
-	libevent (recommend >= 1.3b)
+	libevent (recommend >= 1.4)
 	LuaSocket
 
 See test/ directory for examples of usage.
