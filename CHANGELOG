@@ -1,6 +1,8 @@
 WIP - 2011-01-15
  * Fixed libevent 2.0 compilation errors
  * Merged all of luaevent-prosody changes
+ * Removes low-level read access to watermark & timeout values that break API
+ * Switches to watermark write accessor function to avoid API break
 ======
 luaevent-prosody 0.1.0 - 2010-02-15
  * Fixed stack slot leak in event callbacks
