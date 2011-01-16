@@ -1,3 +1,7 @@
+WIP - 2011-01-15
+ * Fixed libevent 2.0 compilation errors
+ * Merged all of luaevent-prosody changes
+======
 luaevent-prosody 0.1.0 - 2010-02-15
  * Fixed stack slot leak in event callbacks
  * Fixed stack slot leak when error occurs in callback
