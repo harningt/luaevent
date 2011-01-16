@@ -4,22 +4,22 @@ INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
 
 # Flags
-CFLAGS = -O2 -c -Wall -fpic
+CFLAGS = -Wall -fpic
 LDFLAGS = -shared
 
 # Directories
-LUA_INC_DIR=/usr/include/lua5.1
-LUA_LIB_DIR=/usr/lib
+LUA_INC_DIR ?= /usr/include/lua5.1
+LUA_LIB_DIR ?= /usr/lib
 
-INSTALL_DIR_LUA=/usr/share/lua/5.1
-INSTALL_DIR_BIN=/usr/lib/lua/5.1
+INSTALL_DIR_LUA ?= /usr/share/lua/5.1
+INSTALL_DIR_BIN ?= /usr/lib/lua/5.1
 
 # Files
-LUA_LIB = lua5.1
+LUA_LIB ?= lua5.1
 LIB = core.so
 
 all:
-	$(CC) $(CFLAGS) -Iinclude -I$(LUA_INC_DIR) src/*.c
+	$(CC) $(CFLAGS) -c -Iinclude -I$(LUA_INC_DIR) src/*.c
 	$(CC) $(LDFLAGS) -o $(LIB) *.o -L$(LUA_LIB_DIR) -l$(LUA_LIB) -levent
 
 install: all
@@ -29,6 +29,6 @@ install: all
 	$(INSTALL_PROGRAM) $(LIB) $(DESTDIR)$(INSTALL_DIR_BIN)/luaevent/$(LIB)
 
 clean:
-	rm *.so
-	rm *.o
+	rm -f *.so
+	rm -f *.o
 

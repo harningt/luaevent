@@ -43,23 +43,11 @@ Functions:
 	* `low` - When buffer is below this, the event will be fired
 	* `high` - N/A to libevent, user app may use this
 
-## bufferevent:get_read_watermarks
-* Output: `low, high`
-* See `set_read_watermarks`
-
-## bufferevent:get_write_watermarks
-* Output: `low, high`
-* See `set_write_watermarks`
-
 ## bufferevent:set_timeouts
 * Sets timeouts for the bufferevent's events
 * Input: `(read, write)`
 	* `read` - Read readiness timeout
 	* `write` - Write readiness timeout
-
-## bufferevent:get_timeouts
-* Output: `read, write`
-* See `set_timeouts`
 
 ## bufferevent:enable/disable
 * Input: `event flag`
