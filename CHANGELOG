@@ -1,4 +1,4 @@
-WIP - 2011-01-15
+0.3.0 - 2011-01-15
  * Fixed libevent 2.0 compilation errors
  * Merged all of luaevent-prosody changes
  * Removes low-level read access to watermark & timeout values that break API
