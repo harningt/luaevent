@@ -205,8 +205,13 @@ static int buffer_event_get_timeouts(lua_State* L) {
 	le_bufferevent* ev = buffer_event_get(L, 1);
 	if(!ev->ev) return 0;
 
+#if LIBEVENT_VERSION_NUMBER >= 0x02000000
+	lua_pushinteger(L, (ev->ev->timeout_read).tv_sec);
+	lua_pushinteger(L, (ev->ev->timeout_write).tv_sec);
+#else
 	lua_pushinteger(L, ev->ev->timeout_read);
 	lua_pushinteger(L, ev->ev->timeout_write);
+#endif
 	return 2;
 }
 
