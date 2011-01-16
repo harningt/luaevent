@@ -171,24 +171,6 @@ static int buffer_event_set_write_watermarks(lua_State* L) {
 	return 0;
 }
 
-static int buffer_event_get_read_watermarks(lua_State* L) {
-	le_bufferevent* ev = buffer_event_get(L, 1);
-	if(!ev->ev) return 0;
-
-	lua_pushinteger(L, ev->ev->wm_read.low);
-	lua_pushinteger(L, ev->ev->wm_read.high);
-	return 2;
-}
-
-static int buffer_event_get_write_watermarks(lua_State* L) {
-	le_bufferevent* ev = buffer_event_get(L, 1);
-	if(!ev->ev) return 0;
-
-	lua_pushinteger(L, ev->ev->wm_write.low);
-	lua_pushinteger(L, ev->ev->wm_write.high);
-	return 2;
-}
-
 static int buffer_event_set_timeouts(lua_State* L) {
 	int timeout_read, timeout_write;
 	le_bufferevent* ev = buffer_event_get(L, 1);
@@ -199,20 +181,6 @@ static int buffer_event_set_timeouts(lua_State* L) {
 
 	bufferevent_settimeout(ev->ev, timeout_read, timeout_write);
 	return 0;
-}
-
-static int buffer_event_get_timeouts(lua_State* L) {
-	le_bufferevent* ev = buffer_event_get(L, 1);
-	if(!ev->ev) return 0;
-
-#if LIBEVENT_VERSION_NUMBER >= 0x02000000
-	lua_pushinteger(L, (ev->ev->timeout_read).tv_sec);
-	lua_pushinteger(L, (ev->ev->timeout_write).tv_sec);
-#else
-	lua_pushinteger(L, ev->ev->timeout_read);
-	lua_pushinteger(L, ev->ev->timeout_write);
-#endif
-	return 2;
 }
 
 static int buffer_event_enable(lua_State* L) {
@@ -236,10 +204,7 @@ static luaL_Reg buffer_event_funcs[] = {
 	{"get_write", buffer_event_get_write},
 	{"set_read_watermarks", buffer_event_set_read_watermarks},
 	{"set_write_watermarks", buffer_event_set_write_watermarks},
-	{"get_read_watermarks", buffer_event_get_read_watermarks},
-	{"get_write_watermarks", buffer_event_get_write_watermarks},
 	{"set_timeouts", buffer_event_set_timeouts},
-	{"get_timeouts", buffer_event_get_timeouts},
 	{"enable", buffer_event_enable},
 	{"disable", buffer_event_disable},
 	{NULL, NULL}
