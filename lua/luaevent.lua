@@ -5,8 +5,8 @@
 module("luaevent", package.seeall)
 require("luaevent.core")
 
-_NAME = "luaevent-prosody";
-_VERSION = "0.1.0";
+_NAME = "luaevent";
+_VERSION = "0.3.0";
 
 local EV_READ = luaevent.core.EV_READ
 local EV_WRITE = luaevent.core.EV_WRITE
