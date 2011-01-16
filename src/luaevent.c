@@ -1,20 +1,15 @@
 /* LuaEvent - Copyright (C) 2007 Thomas Harning <harningt@gmail.com>
  * Licensed as LGPL - See doc/COPYING for details */
 
-#include "luaevent.h"
 #include "event_callback.h"
 #include "event_buffer.h"
 #include "buffer_event.h"
 
-#include <lua.h>
 #include <lauxlib.h>
 #include <assert.h>
+#include <string.h>
 
 #define EVENT_BASE_MT "EVENT_BASE_MT"
-
-#ifdef _WIN32
-#include <winsock2.h>
-#endif
 
 le_base* event_base_get(lua_State* L, int idx) {
 	return (le_base*)luaL_checkudata(L, idx, EVENT_BASE_MT);
@@ -29,6 +24,11 @@ int luaevent_newbase(lua_State* L) {
 	return 1;
 }
 
+int luaevent_libevent_version(lua_State* L) {
+	lua_pushstring(L, event_get_version());
+	return 1;
+}
+
 static int luaevent_base_gc(lua_State* L) {
 	le_base *base = event_base_get(L, 1);
 	if(base->base) {
@@ -40,14 +40,18 @@ static int luaevent_base_gc(lua_State* L) {
 
 int getSocketFd(lua_State* L, int idx) {
 	int fd;
-	luaL_checktype(L, idx, LUA_TUSERDATA);
-	lua_getfield(L, idx, "getfd");
-	if(lua_isnil(L, -1))
-		return luaL_error(L, "Socket type missing 'getfd' method");
-	lua_pushvalue(L, idx);
-	lua_call(L, 1, 1);
-	fd = lua_tointeger(L, -1);
-	lua_pop(L, 1);
+	if(lua_isnumber(L, idx)) {
+		fd = lua_tonumber(L, idx);
+	} else {
+		luaL_checktype(L, idx, LUA_TUSERDATA);
+		lua_getfield(L, idx, "getfd");
+		if(lua_isnil(L, -1))
+			return luaL_error(L, "Socket type missing 'getfd' method");
+		lua_pushvalue(L, idx);
+		lua_call(L, 1, 1);
+		fd = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+	}
 	return fd;
 }
 
@@ -82,21 +86,47 @@ static int luaevent_addevent(lua_State* L) {
 }
 
 static int luaevent_loop(lua_State* L) {
+	int ret;
 	le_base *base = event_base_get(L, 1);
 	base->loop_L = L;
-	int ret = event_base_loop(base->base, 0);
+	ret = event_base_loop(base->base, 0);
 	lua_pushinteger(L, ret);
+	return 1;
+}
+
+static int luaevent_loopexit(lua_State*L) {
+	int ret;
+	le_base *base = event_base_get(L, 1);
+	struct timeval tv = { 0, 0 };
+	if(lua_gettop(L) >= 2) /* Optional timeout before exiting the loop */
+		load_timeval(luaL_checknumber(L, 2), &tv);
+	ret = event_base_loopexit(base->base, &tv);
+	lua_pushinteger(L, ret);
+	return 1;
+}
+
+static int luaevent_method(lua_State* L) {
+	#ifdef _EVENT_VERSION
+	le_base *base = event_base_get(L, 1);
+	if(strcmp(_EVENT_VERSION, "1.3")<0)
+		lua_pushstring(L, event_base_get_method(base->base));
+	else
+	#endif
+		lua_pushstring(L, event_get_method());
 	return 1;
 }
 
 static luaL_Reg base_funcs[] = {
 	{ "addevent", luaevent_addevent },
 	{ "loop", luaevent_loop },
+	{ "loopexit", luaevent_loopexit },
+	{ "method", luaevent_method },
 	{ NULL, NULL }
 };
 
 static luaL_Reg funcs[] = {
 	{ "new", luaevent_newbase },
+	{ "libevent_version", luaevent_libevent_version },
 	{ NULL, NULL }
 };
 

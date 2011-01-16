@@ -1,7 +1,6 @@
 /* LuaEvent - Copyright (C) 2007 Thomas Harning <harningt@gmail.com>
  * Licensed as LGPL - See doc/COPYING for details */
 #include "buffer_event.h"
-#include "luaevent.h"
 #include "utility.h"
 #include <lauxlib.h>
 #include <malloc.h>
@@ -49,7 +48,12 @@ static void handle_callback(le_bufferevent* le_ev, short what, int callbackIndex
 	/* func, bufferevent */
 	lua_pushinteger(L, what);
 	/* What to do w/ errors...? */
-	lua_pcall(L, 2, 0, 0);
+	if(!lua_pcall(L, 2, 0, 0))
+	{
+		/* FIXME: Perhaps luaevent users should be
+		 * able to set an error handler? */
+		lua_pop(L, 1); /* Pop error message */
+	}
 }
 
 static void buffer_event_readcb(struct bufferevent *ev, void *ptr) {

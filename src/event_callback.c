@@ -43,7 +43,7 @@ void luaevent_callback(int fd, short event, void* p) {
 			load_timeval(newTimeout, &cb->timeout);
 		}
 	}
-	lua_pop(L, 1);
+	lua_pop(L, 2);
 	if(ret == -1) {
 		freeCallbackArgs(cb, L);
 	} else {
