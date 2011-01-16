@@ -153,8 +153,7 @@ static int buffer_event_set_read_watermarks(lua_State* L) {
 	low = lua_tonumber(L, 2);
 	high = lua_tonumber(L, 3);
 
-	ev->ev->wm_read.low = low;
-	ev->ev->wm_read.high = high;
+	bufferevent_setwatermark(ev->ev, EV_READ, low, high);
 	return 0;
 }
 
@@ -166,8 +165,7 @@ static int buffer_event_set_write_watermarks(lua_State* L) {
 	low = lua_tonumber(L, 2);
 	high = lua_tonumber(L, 3);
 
-	ev->ev->wm_write.low = low;
-	ev->ev->wm_write.high = high;
+	bufferevent_setwatermark(ev->ev, EV_WRITE, low, high);
 	return 0;
 }
 
