@@ -1,3 +1,7 @@
+.PHONY: all install clean dist dist-all dist-bzip2 dist-gzip dist-zip
+
+DIST_DIR=dist
+
 # Utilities
 INSTALL = install
 INSTALL_PROGRAM = $(INSTALL)
@@ -19,6 +23,19 @@ LIB = core.so
 all:
 	$(CC) $(CFLAGS) -c -Iinclude -I$(LUA_INC_DIR) src/*.c
 	$(CC) $(LDFLAGS) -o $(LIB) *.o -levent
+
+dist dist-all: distdir dist-bzip2 dist-gzip dist-zip
+
+distdir:
+	mkdir -p $(DIST_DIR)
+
+VERSION=luaevent-$(shell git describe --abbrev=4 HEAD 2>/dev/null)
+dist-bzip2: distdir
+	git archive --format=tar --prefix=$(VERSION)/ HEAD | bzip2 -9v > $(DIST_DIR)/$(VERSION).tar.bz2
+dist-gzip: distdir
+	git archive --format=tar --prefix=$(VERSION)/ HEAD | gzip -9v > $(DIST_DIR)/$(VERSION).tar.gz
+dist-zip: distdir
+	git archive --format=zip --prefix=$(VERSION)/ HEAD > $(DIST_DIR)/$(VERSION).zip
 
 install: all
 	mkdir -p $(DESTDIR)$(INSTALL_DIR_LUA)
