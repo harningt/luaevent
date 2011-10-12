@@ -3,7 +3,7 @@
 
 #include "event_buffer.h"
 #include <lauxlib.h>
-#include <malloc.h>
+#include <stdlib.h>
 
 #define EVENT_BUFFER_MT "EVENT_BUFFER_MT"
 
