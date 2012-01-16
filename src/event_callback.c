@@ -22,7 +22,7 @@ void luaevent_callback(int fd, short event, void* p) {
 	le_callback* cb = p;
 	lua_State* L;
 	int ret;
-	double newTimeout = -1;
+	struct timeval new_tv = { 0, 0 };
 	assert(cb);
 	if(!cb->base)
 		return; /* Event has already been collected + destroyed */
@@ -34,13 +34,11 @@ void luaevent_callback(int fd, short event, void* p) {
 	if(!cb->base)
 		return; /* event was destroyed during callback */
 	ret = lua_tointeger(L, -2);
-	if(lua_isnumber(L, -1)) {
-		newTimeout = lua_tonumber(L, -1);
-		if(newTimeout <= 0) {
-			memset(&cb->timeout, 0, sizeof(cb->timeout));
-		} else {
-			load_timeval(newTimeout, &cb->timeout);
-		}
+	if(lua_isnumber(L, -1))
+	{
+		double newTimeout = lua_tonumber(L, -1);
+		if(newTimeout>0)
+			load_timeval(newTimeout, &new_tv);
 	}
 	lua_pop(L, 2);
 	if(ret == -1) {
@@ -48,9 +46,10 @@ void luaevent_callback(int fd, short event, void* p) {
 	} else {
 		struct event *ev = &cb->ev;
 		int newEvent = ret;
-		/* NOTE: Currently, even if new timeout is the same as the old, a new event is setup regardless... */
-		if(newEvent != event || newTimeout != -1) { // Need to hook up new event...
+       		if( newEvent != event || (cb->timeout.tv_sec != new_tv.tv_sec || cb->timeout.tv_usec != new_tv.tv_usec) )
+       		{
 			struct timeval *ptv = &cb->timeout;
+			cb->timeout = new_tv;
 			if(!cb->timeout.tv_sec && !cb->timeout.tv_usec)
 				ptv = NULL;
 			event_del(ev);
