@@ -24,16 +24,15 @@ void luaevent_callback(int fd, short event, void* p) {
 	int ret;
 	double newTimeout = -1;
 	assert(cb);
-	if(!cb->base) {
-		/* Callback has been collected... die */
-		/* TODO: What should really be done here... */
-		return;
-	}
+	if(!cb->base)
+		return; /* Event has already been collected + destroyed */
 	assert(cb->base->loop_L);
 	L = cb->base->loop_L;
 	lua_rawgeti(L, LUA_REGISTRYINDEX, cb->callbackRef);
 	lua_pushinteger(L, event);
 	lua_call(L, 1, 2);
+	if(!cb->base)
+		return; /* event was destroyed during callback */
 	ret = lua_tointeger(L, -2);
 	if(lua_isnumber(L, -1)) {
 		newTimeout = lua_tonumber(L, -1);
