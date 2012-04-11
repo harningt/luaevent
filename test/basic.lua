@@ -1,4 +1,4 @@
-require "luaevent"
+local luaevent = require("luaevent")
 
 print("Version:", luaevent._NAME.." "..luaevent._VERSION)
 print("libevent version:", luaevent.core.libevent_version())

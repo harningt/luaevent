@@ -1,4 +1,8 @@
 0.4.0 - WIP
+ * Makes compatible with Lua 5.2
+   * Remove use of 'module' in sources
+   * Remove assumption that luaevent will set globals
+     - Only 'core' will modify global table (creating luaevent.core)
  * Fixes bug in merge for receivePartial
 0.3.2 - 2011-07-06
  * Fixed recorded version in Lua

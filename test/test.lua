@@ -3,8 +3,9 @@
 -- Run the test file and the connect to the server by telnet on the used port
 -- to stop the test just send the command "quit"
 
-require"luaevent"
-require"socket"
+local luaevent = require("luaevent")
+local socket = require("socket")
+
 local oldPrint = print
 print = function(...)
 	oldPrint("SRV", ...)

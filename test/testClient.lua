@@ -1,5 +1,6 @@
-require"luaevent"
-require"socket"
+local luaevent = require("luaevent")
+local socket = require("socket")
+
 local oldPrint = print
 print = function(...)
 	oldPrint("CLT", ...)

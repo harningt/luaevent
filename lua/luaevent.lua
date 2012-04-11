@@ -2,15 +2,16 @@
 	LuaEvent - Copyright (C) 2007,2012 Thomas Harning <harningt@gmail.com>
 	Licensed as LGPL - See doc/COPYING for details.
 ]]
-module("luaevent", package.seeall)
-require("luaevent.core")
+local _M = {}
+local core = require("luaevent.core")
 
-_NAME = "luaevent";
-_VERSION = "0.3.2";
+_M.core = core
+_M._NAME = "luaevent"
+_M._VERSION = "0.4.0"
 
-local EV_READ = luaevent.core.EV_READ
-local EV_WRITE = luaevent.core.EV_WRITE
-local base = luaevent.core.new()
+local EV_READ = core.EV_READ
+local EV_WRITE = core.EV_WRITE
+local base = core.new()
 
 local function addevent(...)
 	return base:addevent(...)
@@ -30,7 +31,7 @@ local function socketWait(sock, event)
 end
 
 
-function send(sock, data, start, stop)
+function _M.send(sock, data, start, stop)
 	local s, err
 	local from = start or 1
 	local sent = 0
@@ -41,7 +42,7 @@ function send(sock, data, start, stop)
 		socketWait(sock, EV_WRITE)
 	until false
 end
-function receive(sock, pattern, part)
+function _M.receive(sock, pattern, part)
 	local s, err
 	pattern = pattern or '*l'
 	repeat
@@ -52,17 +53,18 @@ function receive(sock, pattern, part)
 end
 -- same as above but with special treatment when reading chunks,
 -- unblocks on any data received.
-function receivePartial(client, pattern)
+function _M.receivePartial(client, pattern)
 	local s, err, part
 	pattern = pattern or "*l"
 	repeat
-	s, err, part = client:receive(pattern)
-	if s or ( (type(pattern)=="number") and part~="" and part ~=nil ) or 
-		err ~= "timeout" then return s, err, part end
+		s, err, part = client:receive(pattern)
+		if s or ( (type(pattern)=="number") and part~="" and part ~=nil ) or err ~= "timeout" then
+			return s, err, part
+		end
 		socketWait(client, EV_READ)
 	until false
 end
-function connect(sock, ...)
+function _M.connect(sock, ...)
 	sock:settimeout(0)
 	local ret, err = sock:connect(...)
 	if ret or err ~= "timeout" then return ret, err end
@@ -74,7 +76,7 @@ function connect(sock, ...)
 	return ret, err
 end
 -- Deprecated..
-function flush(sock)
+function _M.flush(sock)
 end
 local function clientCoroutine(sock, handler)
 	-- Figure out what to do ......
@@ -96,30 +98,30 @@ local function serverCoroutine(sock, callback)
 		end
 	until false
 end
-function addserver(sock, callback)
+function _M.addserver(sock, callback)
 	local coro = coroutine.create(serverCoroutine)
 	assert(coroutine.resume(coro, sock, callback))
 end
-function addthread(func, ...)
+function _M.addthread(func, ...)
 	return coroutine.resume(coroutine.create(func), ...)
 end
 local _skt_mt = {__index = {
 	connect = function(self, ...)
-		return connect(self.socket, ...)
+		return _M.connect(self.socket, ...)
 	end,
 	send = function (self, data)
-		return send(self.socket, data)
+		return _M.send(self.socket, data)
 	end,
 	
 	receive = function (self, pattern)
 		if (self.timeout==0) then
-  			return receivePartial(self.socket, pattern)
+			return _M.receivePartial(self.socket, pattern)
   		end
-		return receive(self.socket, pattern)
+		return _M.receive(self.socket, pattern)
 	end,
 	
 	flush = function (self)
-		return flush(self.socket)
+		return _M.flush(self.socket)
 	end,
 	
 	settimeout = function (self,time)
@@ -132,7 +134,9 @@ local _skt_mt = {__index = {
 		self.socket:close()
 	end
 }}
-function wrap(sock)
+function _M.wrap(sock)
 	return setmetatable({socket = sock}, _skt_mt)
 end
-loop = function(...) base:loop(...) end
+_M.loop = function(...) base:loop(...) end
+
+return _M
