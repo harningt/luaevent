@@ -1,4 +1,4 @@
-/* LuaEvent - Copyright (C) 2007 Thomas Harning <harningt@gmail.com>
+/* LuaEvent - Copyright (C) 2007,2012 Thomas Harning <harningt@gmail.com>
  * Licensed as LGPL - See doc/COPYING for details */
 #ifndef UTILITY_H
 #define UTILITY_H
