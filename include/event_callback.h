@@ -12,7 +12,7 @@ typedef struct {
 	struct timeval timeout;
 } le_callback;
 
-int event_callback_register(lua_State* L);
+void event_callback_register(lua_State* L);
 
 le_callback* event_callback_push(lua_State* L, int baseIdx, int callbackIdx);
 

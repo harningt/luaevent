@@ -1,5 +1,7 @@
 0.4.0 - WIP
- * Makes compatible with Lua 5.2
+ * Fixes buffer event tests to work with current bufferevent behavior
+ * Fixed buffer event and related tests to be compatible with Lua 5.2
+ * Makes core segment compatible with Lua 5.2
    * Remove use of 'module' in sources
    * Remove assumption that luaevent will set globals
      - Only 'core' will modify global table (creating luaevent.core)

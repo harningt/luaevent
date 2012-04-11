@@ -80,7 +80,7 @@ le_callback* event_callback_push(lua_State* L, int baseIdx, int callbackIdx) {
 	return cb;
 }
 
-int event_callback_register(lua_State* L) {
+void event_callback_register(lua_State* L) {
 	luaL_newmetatable(L, EVENT_CALLBACK_ARG_MT);
 	lua_pushcfunction(L, luaevent_cb_gc);
 	lua_setfield(L, -2, "__gc");
@@ -89,5 +89,4 @@ int event_callback_register(lua_State* L) {
 	lua_setfield(L, -2, "close");
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
-	return 0;
 }

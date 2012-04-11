@@ -167,11 +167,6 @@ int luaopen_luaevent_core(lua_State* L) {
 	WSAStartup(wVersionRequested, &wsaData);
 #endif
 	event_init( );
-	/* Register external items */
-	event_callback_register(L);
-	event_buffer_register(L);
-	buffer_event_register(L);
-	lua_settop(L, 0);
 	/* Setup metatable */
 	luaL_newmetatable(L, EVENT_BASE_MT);
 	lua_newtable(L);
@@ -183,6 +178,12 @@ int luaopen_luaevent_core(lua_State* L) {
 
 	luaL_register(L, "luaevent.core", funcs);
 	setNamedIntegers(L, consts);
+
+	/* Register external items */
+	event_callback_register(L);
+	event_buffer_register(L, lua_gettop(L));
+	buffer_event_register(L, lua_gettop(L));
+
 	return 1;
 }
 

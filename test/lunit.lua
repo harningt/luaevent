@@ -59,9 +59,12 @@ local setfenv = setfenv
 local tostring = tostring
 
 
--- Start package scope
-setfenv(1, P)
-
+if not setfenv then
+	_ENV = P
+else
+	-- Start package scope
+	setfenv(1, P)
+end
 
 
 
@@ -452,10 +455,10 @@ function run()
   -- Count Test Cases and Tests --
   --------------------------------
   
-  stats.testcases = table.getn(testcases)
+  stats.testcases = #testcases -- table.getn(testcases)
   
   for _, tc in ipairs(testcases) do
-    stats_inc("tests" , table.getn(tc.__lunit_tests))
+    stats_inc("tests" , #tc.__lunit_tests) --table.getn(tc.__lunit_tests))
   end
   
   ------------------
@@ -575,7 +578,8 @@ function run_testcase(tc)
   ---------------------------------
   
   print()
-  print("#### Running '"..tc.__lunit_name.."' ("..table.getn(tc.__lunit_tests).." Tests)...")
+  --print("#### Running '"..tc.__lunit_name.."' ("..table.getn(tc.__lunit_tests).." Tests)...")
+  print("#### Running '"..tc.__lunit_name.."' ("..#tc.__lunit_tests.." Tests)...")
   
   for _, testname in ipairs(tc.__lunit_tests) do
     if setup(testname) then

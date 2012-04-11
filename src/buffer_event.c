@@ -213,7 +213,7 @@ static luaL_Reg funcs[] = {
 	{NULL, NULL}
 };
 
-int buffer_event_register(lua_State* L) {
+void buffer_event_register(lua_State* L, int coreIndex) {
 	luaL_newmetatable(L, BUFFER_EVENT_MT);
 	lua_pushcfunction(L, buffer_event_gc);
 	lua_setfield(L, -2, "__gc");
@@ -222,6 +222,7 @@ int buffer_event_register(lua_State* L) {
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
 
-	luaL_register(L, "luaevent.core.bufferevent", funcs);
-	return 1;
+	lua_newtable(L);
+	luaL_register(L, NULL, funcs);
+	lua_setfield(L, coreIndex, "bufferevent");
 }

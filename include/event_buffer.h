@@ -9,7 +9,7 @@ typedef struct {
 	struct evbuffer* buffer;
 } le_buffer;
 
-int event_buffer_register(lua_State* L);
+void event_buffer_register(lua_State* L, int coreIndex);
 int is_event_buffer(lua_State* L, int idx);
 le_buffer* event_buffer_check(lua_State* L, int idx);
 int event_buffer_push(lua_State* L, struct evbuffer* buffer);

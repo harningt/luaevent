@@ -10,7 +10,7 @@ typedef struct {
 	le_base* base;
 } le_bufferevent;
 
-int buffer_event_register(lua_State* L);
+void buffer_event_register(lua_State* L, int coreIndex);
 int is_buffer_event(lua_State* L, int idx);
 le_bufferevent* buffer_event_check(lua_State* L, int idx);
 
