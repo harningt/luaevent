@@ -1,5 +1,5 @@
 --[[
-	LuaEvent - Copyright (C) 2007 Thomas Harning <harningt@gmail.com>
+	LuaEvent - Copyright (C) 2007,2012 Thomas Harning <harningt@gmail.com>
 	Licensed as LGPL - See doc/COPYING for details.
 ]]
 module("luaevent", package.seeall)
@@ -59,7 +59,7 @@ function receivePartial(client, pattern)
 	s, err, part = client:receive(pattern)
 	if s or ( (type(pattern)=="number") and part~="" and part ~=nil ) or 
 		err ~= "timeout" then return s, err, part end
-		socketWait(sock, EV_READ)
+		socketWait(client, EV_READ)
 	until false
 end
 function connect(sock, ...)

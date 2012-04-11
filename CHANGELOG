@@ -1,3 +1,5 @@
+0.4.0 - WIP
+ * Fixes bug in merge for receivePartial
 0.3.2 - 2011-07-06
  * Fixed recorded version in Lua
 0.3.1 - 2011-01-15
