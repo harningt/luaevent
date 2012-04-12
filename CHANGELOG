@@ -1,3 +1,6 @@
+0.4.1 - WIP
+ * Cleans up timertest formatting
+======
 0.4.0 - 2012-04-10
  * Fixes buffer event tests to work with current bufferevent behavior
  * Fixed buffer event and related tests to be compatible with Lua 5.2
