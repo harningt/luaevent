@@ -33,7 +33,10 @@ void luaevent_callback(int fd, short event, void* p) {
 	lua_call(L, 1, 2);
 	if(!cb->base)
 		return; /* event was destroyed during callback */
-	ret = lua_tointeger(L, -2);
+	/* If nothing is returned, re-use the old event value */
+	ret = luaL_optinteger(L, -2, event);
+	/* Clone the old timeout value in case a new one wasn't set */
+	memcpy(&new_tv, &cb->timeout, sizeof(new_tv));
 	if(lua_isnumber(L, -1)) {
 		double newTimeout = lua_tonumber(L, -1);
 		if(newTimeout > 0) {
