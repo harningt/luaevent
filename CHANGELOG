@@ -1,4 +1,4 @@
-0.4.1 - WIP
+0.4.1 - 2012-04-12
  * Fixes event_callback handling to handle the no-return-value case better
  * Cleans up timertest formatting
 ======
