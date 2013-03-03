@@ -30,7 +30,12 @@ void luaevent_callback(int fd, short event, void* p) {
 	L = cb->base->loop_L;
 	lua_rawgeti(L, LUA_REGISTRYINDEX, cb->callbackRef);
 	lua_pushinteger(L, event);
-	lua_call(L, 1, 2);
+	if(lua_pcall(L, 1, 2, 0))
+	{
+		cb->base->errorMessage = luaL_ref(L, LUA_REGISTRYINDEX);
+		event_base_loopbreak(cb->base->base);
+		return;
+	}
 	if(!cb->base)
 		return; /* event was destroyed during callback */
 	/* If nothing is returned, re-use the old event value */
