@@ -36,6 +36,7 @@
 typedef struct {
 	struct event_base* base;
 	lua_State* loop_L;
+	int errorMessage;
 } le_base;
 
 le_base* event_base_get(lua_State* L, int idx);

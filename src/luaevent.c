@@ -89,7 +89,15 @@ static int luaevent_loop(lua_State* L) {
 	int ret;
 	le_base *base = event_base_get(L, 1);
 	base->loop_L = L;
+	base->errorMessage = LUA_NOREF;
 	ret = event_base_loop(base->base, 0);
+	if(base->errorMessage != LUA_NOREF)
+	{
+		lua_rawgeti(L, LUA_REGISTRYINDEX, base->errorMessage);
+		luaL_unref(L, LUA_REGISTRYINDEX, base->errorMessage);
+		base->errorMessage = LUA_NOREF;
+		return lua_error(L);
+	}
 	lua_pushinteger(L, ret);
 	return 1;
 }
