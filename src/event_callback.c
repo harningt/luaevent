@@ -34,10 +34,13 @@ void luaevent_callback(int fd, short event, void* p) {
 	{
 		cb->base->errorMessage = luaL_ref(L, LUA_REGISTRYINDEX);
 		event_base_loopbreak(cb->base->base);
+		lua_pop(L, 2);
 		return;
 	}
-	if(!cb->base)
+	if(!cb->base) {
+		lua_pop(L, 2);
 		return; /* event was destroyed during callback */
+	}
 	/* If nothing is returned, re-use the old event value */
 	ret = luaL_optinteger(L, -2, event);
 	/* Clone the old timeout value in case a new one wasn't set */
