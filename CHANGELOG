@@ -1,3 +1,5 @@
+0.4.3 - 2013-03-11
+ * Fixes unchecked stack increase resulting in potential overflow
 0.4.2 - 2013-03-10
  * Adds error catching / re-raise
 0.4.1 - 2012-04-12
