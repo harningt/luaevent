@@ -34,7 +34,7 @@ void luaevent_callback(int fd, short event, void* p) {
 	{
 		cb->base->errorMessage = luaL_ref(L, LUA_REGISTRYINDEX);
 		event_base_loopbreak(cb->base->base);
-		lua_pop(L, 2);
+		lua_pop(L, 1);
 		return;
 	}
 	if(!cb->base) {
