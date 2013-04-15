@@ -184,7 +184,8 @@ int luaopen_luaevent_core(lua_State* L) {
 	lua_setfield(L, -2, "__gc");
 	lua_pop(L, 1);
 
-	luaL_register(L, "luaevent.core", funcs);
+	lua_newtable(L);
+	luaL_register(L, NULL, funcs);
 	setNamedIntegers(L, consts);
 
 	/* Register external items */
