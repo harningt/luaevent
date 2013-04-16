@@ -7,7 +7,7 @@ local core = require("luaevent.core")
 
 _M.core = core
 _M._NAME = "luaevent"
-_M._VERSION = "0.4.0"
+_M._VERSION = "0.4.4"
 
 local EV_READ = core.EV_READ
 local EV_WRITE = core.EV_WRITE
