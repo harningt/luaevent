@@ -23,6 +23,7 @@ void luaevent_callback(int fd, short event, void* p) {
 	lua_State* L;
 	int ret;
 	struct timeval new_tv = { 0, 0 };
+	le_base* base;
 	assert(cb);
 	if(!cb->base)
 		return; /* Event has already been collected + destroyed */
@@ -31,7 +32,7 @@ void luaevent_callback(int fd, short event, void* p) {
 	lua_rawgeti(L, LUA_REGISTRYINDEX, cb->callbackRef);
 	lua_pushinteger(L, event);
 	/* cb->base may be NULL after the pcall, if the event is destroyed */
-	le_base* base = cb->base;
+	base = cb->base;
 	if(lua_pcall(L, 1, 2, 0))
 	{
 		base->errorMessage = luaL_ref(L, LUA_REGISTRYINDEX);
