@@ -17,6 +17,8 @@ Build Requirements:
 Usage Requirements:
 	libevent (recommend >= 1.4)
 	LuaSocket
+License:
+	MIT
 
 See test/ directory for examples of usage.
 

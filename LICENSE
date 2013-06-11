@@ -1,4 +1,6 @@
 LuaEvent - Binding of libevent to Lua to offer event-based IO programming
-Copyright (C) 2007,2012 Thomas Harning <harningt@gmail.com>
+Copyright (C) 2007,2012,2013 Thomas Harning <harningt@gmail.com>
+
+Licensed under the MIT license.
 
 See doc/COPYING for more details.
