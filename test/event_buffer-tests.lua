@@ -1,163 +1,157 @@
 local core = require("luaevent.core")
-local buffer = core.buffer
 
-require("lunit")
+describe("Buffer tests", function()
+    local buffer, buffer2
+    before_each(function()
+        buffer = core.buffer.new()
+        buffer2 = core.buffer.new()
+    end)
 
---lunit.import("all")
+    after_each(function()
+        buffer:close()
+        buffer2:close()
+    end)
 
-bufferTests = lunit.TestCase("bufferTests")
+    local function testDataEqual(expected, actual, msg)
+        msg = msg or ''
+        assert.message("Buffer not the same: " .. msg).are.equal(expected, actual:get_data())
+        assert.message("Buffer length not the same: " .. msg).are.equal(#expected, actual:length())
+        assert.message("Buffer (from tostring) not the same: " .. msg).are.equal(expected, tostring(actual))
+        assert.message("Buffer length (from #) not zero: " .. msg).are.equal(#expected, #actual)
+    end
 
-function bufferTests:setup()
-	self.buffer = buffer.new()
-	self.buffer2 = buffer.new()
-end
+    it("should be empty on startup", function()
+        testDataEqual("", buffer, "Buffer not empty")
+        testDataEqual("", buffer2, "Buffer2 not empty")
+    end)
 
-function bufferTests:teardown()
-	self.buffer:close()
-	self.buffer2:close()
-end
+    it("should support trivial simple string add", function()
+        buffer:add("Hello")
+        testDataEqual("Hello", buffer)
+        buffer:add("Hello")
+        testDataEqual("HelloHello", buffer)
+    end)
 
-local function testDataEqual(expected, actual, msg)
-	msg = msg or ''
-	lunit.assert_equal(expected, actual:get_data(), "Buffer not the same: " .. msg)
-	lunit.assert_equal(#expected, actual:length(), "Buffer length not the same: " .. msg)
-	lunit.assert_equal(expected, tostring(actual), "Buffer (from tostring) not the same: " .. msg)
-	lunit.assert_equal(#expected, #actual, "Buffer length (from #) not zero: " .. msg)
-end
+    it("should support adding multiple strings", function()
+        buffer:add("Hello", "Hello")
+        testDataEqual("HelloHello", buffer)
+    end)
 
-function bufferTests:test_empty()
-	testDataEqual("", self.buffer, "Buffer not empty")
-	testDataEqual("", self.buffer2, "Buffer2 not empty")
-end
+    it("should be able to add digits", function()
+        buffer:add(1,2,3,4)
+        testDataEqual("1234", buffer)
+        buffer:add(100)
+        testDataEqual("1234100", buffer)
+        buffer:add(1.1)
+        testDataEqual("12341001.1", buffer)
+    end)
 
-function bufferTests:test_addSimpleString()
-	self.buffer:add("Hello")
-	testDataEqual("Hello", self.buffer)
-	self.buffer:add("Hello")
-	testDataEqual("HelloHello", self.buffer)
-end
+    it("should support addBuffer", function()
+        buffer:add(buffer2)
+        testDataEqual("", buffer)
+        testDataEqual("", buffer2)
+        buffer2:add("Hello")
+        testDataEqual("Hello", buffer2)
+        buffer:add(buffer2)
+        testDataEqual("Hello", buffer)
+        testDataEqual("", buffer2)
+        assert.message("Cannot self-add buffers").has.errors(function()
+            buffer:add(buffer)
+        end)
+        assert.message("Cannot self-add buffers").has.errors(function()
+            buffer2:add(buffer2)
+        end)
+        testDataEqual("Hello", buffer, "Failures should not affect data content")
+        testDataEqual("", buffer2, "Failures should not affect data content")
+    end)
 
-function bufferTests:test_addMultipleStrings()
-	self.buffer:add("Hello", "Hello")
-	testDataEqual("HelloHello", self.buffer)
-end
+    it("should fail when bad values are added", function()
+        assert.message("Should not be able to add no values").has.errors(function()
+            buffer:add()
+        end)
+        assert.message("Should not be able to add boolean true").has.errors(function()
+            buffer:add(true)
+        end)
+        assert.message("Should not be able to add boolean false").has.errors(function()
+            buffer:add(false)
+        end)
+        assert.message("Should not be able to add functions").has.errors(function()
+            buffer:add(function() end)
+        end)
+        assert.message("Should not be able to add threads").has.errors(function()
+            buffer:add(coroutine.create(function() end))
+        end)
+        assert.message("Should not be able to add non-buffer userdata").has.errors(function()
+            buffer:add(newproxy())
+        end)
+        assert.message("Should not be able to add nil values").has.errors(function()
+            buffer:add(nil)
+        end)
+        assert.message("Multiples including valid values should not affect failure results").has.errors(function()
+            buffer:add("Hello", 1, bufferb, true, false, function() end, newproxy(), nil)
+        end)
+        testDataEqual("", buffer, "Buffer not empty after failing additions")
+    end)
 
-function bufferTests:test_addDigits()
-	self.buffer:add(1,2,3,4)
-	testDataEqual("1234", self.buffer)
-	self.buffer:add(100)
-	testDataEqual("1234100", self.buffer)
-	self.buffer:add(1.1)
-	testDataEqual("12341001.1", self.buffer)
-end
+    it("should properly support draining", function()
+        buffer:add("123456789")
+        testDataEqual("123456789", buffer)
+        assert.message("Cannot call drain w/ no args").has.errors(function()
+            buffer:drain()
+        end)
+        buffer:drain(1)
+        testDataEqual("23456789", buffer)
+        buffer:drain(4)
+        testDataEqual("6789", buffer)
+        assert.message("Should be able to apply draining beyond actual buffer length").has.no.errors(function()
+            buffer:drain(5)
+        end)
+        testDataEqual("", buffer)
+        buffer:add("123456789")
+        testDataEqual("123456789", buffer)
+        assert.message([[Should be able to apply negative draining to cause draining `all data`
+        (see source comments for why)]]).has.no.errors(function()
+            buffer:drain(-1)
+        end)
+        testDataEqual("", buffer)
+    end)
 
-function bufferTests:test_addBuffer()
-	self.buffer:add(self.buffer2)
-	testDataEqual("", self.buffer)
-	testDataEqual("", self.buffer2)
-	self.buffer2:add("Hello")
-	testDataEqual("Hello", self.buffer2)
-	self.buffer:add(self.buffer2)
-	testDataEqual("Hello", self.buffer)
-	testDataEqual("", self.buffer2)
-	lunit.assert_error("Cannot self-add buffers", function()
-		self.buffer:add(self.buffer)
-	end)
-	lunit.assert_error("Cannot self-add buffers", function()
-		self.buffer2:add(self.buffer2)
-	end)
-	testDataEqual("Hello", self.buffer, "Failures should not affect data content")
-	testDataEqual("", self.buffer2, "Failures should not affect data content")
-end
+    it("should have working partial reads", function()
+        buffer:add("123456789")
+        assert.are.equal("1234", buffer:get_data(4))
+        assert.are.equal("1234", buffer:get_data(1,4))
+        assert.are.equal("5678", buffer:get_data(5,4))
+        assert.are.equal("5", buffer:get_data(5,1))
+        assert.message("Data length is capped at max obtainable").are.equal("56789", buffer:get_data(5,100000000))
+        assert.message("Negative sizes capture entire remaining string").are.equal("56789", buffer:get_data(5,-100))
+        assert.message("Negative position causes wraparound").are.equal("9", buffer:get_data(-1, 1))
+        assert.message("Negative wraparound does not cause length inversion").are.equal("89", buffer:get_data(-2,2))
+    end)
 
-function bufferTests:test_addBadValues_fail()
-	lunit.assert_error("Should not be able to add no values", function()
-		self.buffer:add()
-	end)
-	lunit.assert_error("Should not be able to add boolean true", function()
-		self.buffer:add(true)
-	end)
-	lunit.assert_error("Should not be able to add boolean false", function()
-		self.buffer:add(false)
-	end)
-	lunit.assert_error("Should not be able to add functions", function()
-		self.buffer:add(function() end)
-	end)
-	lunit.assert_error("Should not be able to add threads", function()
-		self.buffer:add(coroutine.create(function() end))
-	end)
-	lunit.assert_error("Should not be able to add non-buffer userdata", function()
-		self.buffer:add(newproxy())
-	end)
-	lunit.assert_error("Should not be able to add nil values", function()
-		self.buffer:add(nil)
-	end)
-	lunit.assert_error("Multiples including valid values should not affect failure results", function()
-		self.buffer:add("Hello", 1, bufferb, true, false, function() end, newproxy(), nil)
-	end)
-	testDataEqual("", self.buffer, "Buffer not empty after failing additions")
-end
-
-function bufferTests:test_drain()
-	self.buffer:add("123456789")
-	testDataEqual("123456789", self.buffer)
-	lunit.assert_error("Cannot call drain w/ no args", function()
-		self.buffer:drain()
-	end)
-	self.buffer:drain(1)
-	testDataEqual("23456789", self.buffer)
-	self.buffer:drain(4)
-	testDataEqual("6789", self.buffer)
-	lunit.assert_pass("Should be able to apply draining beyond actual buffer length", function()
-		self.buffer:drain(5)
-	end)
-	testDataEqual("", self.buffer)
-	self.buffer:add("123456789")
-	testDataEqual("123456789", self.buffer)
-	lunit.assert_pass([[Should be able to apply negative draining to cause draining `all data`
-	(see source comments for why)]], function()
-		self.buffer:drain(-1)
-	end)
-	testDataEqual("", self.buffer)
-end
-
-function bufferTests:test_getPartial()
-	self.buffer:add("123456789")
-	lunit.assert_equal("1234", self.buffer:get_data(4))
-	lunit.assert_equal("1234", self.buffer:get_data(1,4))
-	lunit.assert_equal("5678", self.buffer:get_data(5,4))
-	lunit.assert_equal("5", self.buffer:get_data(5,1))
-	lunit.assert_equal("56789", self.buffer:get_data(5,100000000), "Data length is capped at max obtainable")
-	lunit.assert_equal("56789", self.buffer:get_data(5,-100), "Negative sizes capture entire remaining string")
-	lunit.assert_equal("9", self.buffer:get_data(-1, 1, "Negative position causes wraparound"))
-	lunit.assert_equal("89", self.buffer:get_data(-2,2, "Negative wraparound does not cause length inversion"))
-end
-
-local lineData = [[1
+    local lineData = [[1
 2
 3]]
-local splitLineData = {
-	"1","2",nil
-}
-local mixedLineData = "1\r2\n3\r\n4\n\r5\r\r6\n\n7\r\n\r8\r\n\r9"
-local splitMixedLineData = {
-	"1","2","3","4","5","6","7","8", nil
-}
-function bufferTests:test_readline()
-	self.buffer:add(lineData)
-	testDataEqual(lineData, self.buffer)
-	for _, data in ipairs(splitLineData) do
-		lunit.assert_equal(data, self.buffer:readline())
-	end
-	testDataEqual("3", self.buffer, "Failed readline doesn't affect buffer contents")
-	self.buffer:drain(-1)
-	testDataEqual("", self.buffer)
-	self.buffer:add(mixedLineData)
-	testDataEqual(mixedLineData, self.buffer)
-	for _, data in ipairs(splitMixedLineData) do
-		lunit.assert_equal(data, self.buffer:readline())
-	end
-	testDataEqual("9", self.buffer)
-end
-
-lunit.run()
+    local splitLineData = {
+        "1","2",nil
+    }
+    local mixedLineData = "1\r2\n3\r\n4\n\r5\r\r6\n\n7\r\n\r8\r\n\r9"
+    local splitMixedLineData = {
+        "1","2","3","4","5","6","7","8", nil
+    }
+    it("should have a working readline", function()
+        buffer:add(lineData)
+        testDataEqual(lineData, buffer)
+        for _, data in ipairs(splitLineData) do
+            assert.are.equal(data, buffer:readline())
+        end
+        testDataEqual("3", buffer, "Failed readline doesn't affect buffer contents")
+        buffer:drain(-1)
+        testDataEqual("", buffer)
+        buffer:add(mixedLineData)
+        testDataEqual(mixedLineData, buffer)
+        for _, data in ipairs(splitMixedLineData) do
+            assert.are.equal(data, buffer:readline())
+        end
+        testDataEqual("9", buffer)
+    end)
+end)
