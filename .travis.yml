@@ -3,12 +3,6 @@ language: c
 
 sudo: false
 
-branches:
-    only:
-        - develop
-        - feature/travis
-        - feature/lua5.3-dev
-
 env:
     global:
         - LUAROCKS=2.2.2
