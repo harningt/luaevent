@@ -93,6 +93,11 @@ function _M.connect(sock, ...)
 	end
 	return ret, err
 end
+
+function _M.dirty(sock)
+	return sock:dirty()
+end
+
 -- Deprecated..
 function _M.flush(sock)
 end
@@ -137,7 +142,11 @@ local _skt_mt = {__index = {
   		end
 		return _M.receive(self.socket, pattern)
 	end,
-	
+
+	dirty = function(self)
+		return _M.dirty(self.socket)
+	end,
+
 	flush = function (self)
 		return _M.flush(self.socket)
 	end,
