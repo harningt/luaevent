@@ -1,0 +1,29 @@
+# Pull in python for access to pip for hererocks
+language: python
+
+sudo: false
+
+env:
+    global:
+        - LUAROCKS=2.3.0
+    matrix:
+        - LUA="luajit 2.1"
+        - LUA="luajit 2.0"
+        - LUA="lua 5.3"
+        - LUA="lua 5.2"
+        - LUA="lua 5.1"
+
+before_install:
+    - pip install hererocks
+    - hererocks env -r $LUAROCKS --$LUA
+    - source env/bin/activate
+    - luarocks install busted
+
+script:
+    - luarocks make rockspecs/luaevent/luaevent-scm-0.rockspec
+    - cd test && busted event_buffer-tests.lua
+
+notifications:
+    email:
+        on_success: change
+        on_failure: always

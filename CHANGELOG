@@ -1,5 +1,12 @@
-0.4.4 - WIP
+0.4.4 - 2016-08-04
  * Updated license to MIT license
+ * Add basic continuous integration tests via Travis-CI
+ * event_callback.c: Don't pop too much. Kim Alvefur <zash@zash.se>
+ * Updates to reduce global pollution
+ * Support Lua 5.3
+ * Use busted test framework for buffer tests
+ * Fix crashes due to event being deleted while in callback
+ * Fix 0 timeout handling appropriately (it is a valid value)
 0.4.3 - 2013-03-11
  * Fixes unchecked stack increase resulting in potential overflow
 0.4.2 - 2013-03-10

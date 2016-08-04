@@ -83,8 +83,6 @@ void luaevent_callback(int fd, short event, void* p) {
 		if( newEvent != event || (cb->timeout.tv_sec != new_tv.tv_sec || cb->timeout.tv_usec != new_tv.tv_usec) ) {
 			struct timeval *ptv = &cb->timeout;
 			cb->timeout = new_tv;
-			if(!cb->timeout.tv_sec && !cb->timeout.tv_usec)
-				ptv = NULL;
 			event_del(ev);
 			event_set(ev, fd, EV_PERSIST | newEvent, luaevent_callback, cb);
 			/* Assume cannot set a new timeout.. */
