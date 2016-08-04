@@ -1,4 +1,4 @@
-0.4.4 - WIP
+0.4.4 - 2016-08-04
  * Updated license to MIT license
  * Add basic continuous integration tests via Travis-CI
  * event_callback.c: Don't pop too much. Kim Alvefur <zash@zash.se>
