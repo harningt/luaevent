@@ -84,7 +84,7 @@ void luaevent_callback(int fd, short event, void* p) {
 	memcpy(&new_tv, &cb->timeout, sizeof(new_tv));
 	if(lua_isnumber(L, -1)) {
 		double newTimeout = lua_tonumber(L, -1);
-		if(newTimeout > 0) {
+		if(newTimeout >= 0) {
 			load_timeval(newTimeout, &new_tv);
 		}
 	}
