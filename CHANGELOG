@@ -1,3 +1,6 @@
+0.4.5 - 2018-11-01
+ * Fix to allow 0 timeout values. Matthew Wild <mwild1@gmail.com>
+ * Collect traceback if an error occurs in a callback. Kim Alvefur <zash@zash.se>
 0.4.4 - 2016-08-04
  * Updated license to MIT license
  * Add basic continuous integration tests via Travis-CI
