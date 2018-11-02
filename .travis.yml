@@ -3,6 +3,11 @@ language: python
 
 sudo: false
 
+addons:
+    apt:
+        packages:
+            - libevent-dev
+
 env:
     global:
         - LUAROCKS=2.3.0

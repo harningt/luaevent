@@ -41,7 +41,7 @@ is used, no need to manually de-allocate */
 void luaevent_callback(int fd, short event, void* p) {
 	le_callback* cb = p;
 	lua_State* L;
-	int ret;
+	int ret, errfunc;
 	struct timeval new_tv = { 0, 0 };
 	le_base* base;
 	assert(cb);
@@ -49,11 +49,25 @@ void luaevent_callback(int fd, short event, void* p) {
 		return; /* Event has already been collected + destroyed */
 	assert(cb->base->loop_L);
 	L = cb->base->loop_L;
+
+	errfunc = 0;
+
+	lua_getglobal(L, "debug");
+
+	if(lua_istable(L, -1)) {
+		lua_getfield(L, -1, "traceback");
+
+		if(lua_isfunction(L, -1)) {
+			errfunc = lua_gettop(L);
+		}
+	}
+
 	lua_rawgeti(L, LUA_REGISTRYINDEX, cb->callbackRef);
 	lua_pushinteger(L, event);
 	/* cb->base may be NULL after the pcall, if the event is destroyed */
 	base = cb->base;
-	if(lua_pcall(L, 1, 2, 0))
+
+	if(lua_pcall(L, 1, 2, errfunc))
 	{
 		base->errorMessage = luaL_ref(L, LUA_REGISTRYINDEX);
 		event_base_loopbreak(base->base);
@@ -70,7 +84,7 @@ void luaevent_callback(int fd, short event, void* p) {
 	memcpy(&new_tv, &cb->timeout, sizeof(new_tv));
 	if(lua_isnumber(L, -1)) {
 		double newTimeout = lua_tonumber(L, -1);
-		if(newTimeout > 0) {
+		if(newTimeout >= 0) {
 			load_timeval(newTimeout, &new_tv);
 		}
 	}
