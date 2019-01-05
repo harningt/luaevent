@@ -58,8 +58,13 @@ void luaevent_callback(int fd, short event, void* p) {
 		lua_getfield(L, -1, "traceback");
 
 		if(lua_isfunction(L, -1)) {
+			lua_remove(L, -2);
 			errfunc = lua_gettop(L);
+		} else {
+			lua_pop(L, 2);
 		}
+	} else {
+		lua_pop(L, 1);
 	}
 
 	lua_rawgeti(L, LUA_REGISTRYINDEX, cb->callbackRef);
@@ -67,7 +72,11 @@ void luaevent_callback(int fd, short event, void* p) {
 	/* cb->base may be NULL after the pcall, if the event is destroyed */
 	base = cb->base;
 
-	if(lua_pcall(L, 1, 2, errfunc))
+	ret = lua_pcall(L, 1, 2, errfunc);
+	if(errfunc) {
+		lua_remove(L, errfunc);
+	}
+	if(ret)
 	{
 		base->errorMessage = luaL_ref(L, LUA_REGISTRYINDEX);
 		event_base_loopbreak(base->base);
