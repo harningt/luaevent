@@ -1,6 +1,6 @@
 --[[
    LuaEvent
-   Copyright (C) 2007,2012,2013,2016,2018 Thomas Harning <harningt@gmail.com>
+   Copyright (C) 2007,2012,2013,2016,2018,2019 Thomas Harning <harningt@gmail.com>
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@ local core = require("luaevent.core")
 
 _M.core = core
 _M._NAME = "luaevent"
-_M._VERSION = "0.4.5"
+_M._VERSION = "0.4.6"
 
 local EV_READ = core.EV_READ
 local EV_WRITE = core.EV_WRITE
