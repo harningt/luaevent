@@ -31,10 +31,6 @@ local EV_READ = core.EV_READ
 local EV_WRITE = core.EV_WRITE
 local base = core.new()
 
-local function addevent(...)
-	return base:addevent(...)
-end
-
 local function getWrapper()
 	local running = coroutine.running()
 	return function(...)
@@ -44,8 +40,12 @@ end
 -- Weak keys.. the keys are the client sockets
 local clientTable = setmetatable({}, {'__mode', 'kv'})
 local function socketWait(sock, event)
-	if not clientTable[sock] then clientTable[sock] = addevent(sock, event, getWrapper()) end
+	if not clientTable[sock] then clientTable[sock] = _M.addevent(sock, event, getWrapper()) end
 	coroutine.yield(event)
+end
+
+function _M.addevent(...)
+	return base:addevent(...)
 end
 
 
@@ -104,7 +104,7 @@ local function handleClient(co, client, handler)
 	local ok, res, event = coroutine.resume(co, client, handler)
 end
 local function serverCoroutine(sock, callback)
-	local listenItem = addevent(sock, EV_READ, getWrapper())
+	local listenItem = _M.addevent(sock, EV_READ, getWrapper())
 	repeat
 		local event = coroutine.yield(EV_READ)
 		-- Get new socket
