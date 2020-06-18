@@ -10,10 +10,12 @@ addons:
 
 env:
     global:
-        - LUAROCKS=2.3.0
+        - LUAROCKS=3.3
     matrix:
+        - LUA="moonjit 2.1"
         - LUA="luajit 2.1"
         - LUA="luajit 2.0"
+        - LUA="lua 5.4"
         - LUA="lua 5.3"
         - LUA="lua 5.2"
         - LUA="lua 5.1"
@@ -25,7 +27,7 @@ before_install:
     - luarocks install busted
 
 script:
-    - luarocks make rockspecs/luaevent/luaevent-scm-0.rockspec
+    - luarocks make rockspecs/luaevent/luaevent-scm-1.rockspec
     - cd test && busted event_buffer-tests.lua
 
 notifications:
