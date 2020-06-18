@@ -27,7 +27,7 @@ before_install:
     - luarocks install busted
 
 script:
-    - luarocks make rockspecs/luaevent/luaevent-scm-0.rockspec
+    - luarocks make rockspecs/luaevent/luaevent-scm-1.rockspec
     - cd test && busted event_buffer-tests.lua
 
 notifications:
