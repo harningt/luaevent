@@ -1,3 +1,6 @@
+0.4.7 - PENDING
+ * Test and enable Lua 5.4-rc1 and Moonjit 2.1
+ * Expose addevent. Audric Schiltknecht <audric.schiltknecht@viagenie.ca>
 0.4.6 - 2019-01-05
  * Correctly balance stack in callback. Mattew Wild <mwild1@gmail.com>
 0.4.5 - 2018-11-01
