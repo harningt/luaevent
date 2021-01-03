@@ -60,7 +60,11 @@ int is_buffer_event(lua_State* L, int idx) {
 static void handle_callback(le_bufferevent* le_ev, short what, int callbackIndex) {
 	lua_State* L = le_ev->base->loop_L;
 	le_weak_get(L, le_ev);
+#if LUA_VERSION_NUM > 501
+	lua_getuservalue(L, -1);
+#else
 	lua_getfenv(L, -1);
+#endif
 	lua_rawgeti(L, -1, callbackIndex);
 	lua_remove(L, -2);
 	lua_pushvalue(L, -2);
@@ -117,7 +121,11 @@ static int buffer_event_push(lua_State* L) {
 	lua_rawseti(L, -2, READ_BUFFER_LOCATION);
 	event_buffer_push(L, ev->ev->output);
 	lua_rawseti(L, -2, WRITE_BUFFER_LOCATION);
+#if LUA_VERSION_NUM > 501
+	lua_setuservalue(L, -2);
+#else
 	lua_setfenv(L, -2);
+#endif
 	ev->base = base;
 	return 1;
 }
@@ -133,7 +141,11 @@ static int buffer_event_gc(lua_State* L) {
 		ev->ev = NULL;
 		/* Also clear out the associated input/output event_buffers
 		 * since they would have already been freed.. */
+#if LUA_VERSION_NUM > 501
+		lua_getuservalue(L, -1);
+#else
 		lua_getfenv(L, 1);
+#endif
 		lua_rawgeti(L, -1, READ_BUFFER_LOCATION);
 		lua_rawgeti(L, -2, WRITE_BUFFER_LOCATION);
 		read = event_buffer_check(L, -2);
@@ -153,14 +165,22 @@ static int buffer_event_gc(lua_State* L) {
 
 static int buffer_event_get_read(lua_State* L) {
 	(void)buffer_event_get(L, 1);
+#if LUA_VERSION_NUM > 501
+	lua_getuservalue(L, -1);
+#else
 	lua_getfenv(L, 1);
+#endif
 	lua_rawgeti(L, -1, READ_BUFFER_LOCATION);
 	return 1;
 }
 
 static int buffer_event_get_write(lua_State* L) {
 	(void)buffer_event_get(L, 1);
+#if LUA_VERSION_NUM > 501
+	lua_getuservalue(L, -1);
+#else
 	lua_getfenv(L, 1);
+#endif
 	lua_rawgeti(L, -1, WRITE_BUFFER_LOCATION);
 	return 1;
 }
