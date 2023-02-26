@@ -191,7 +191,11 @@ int luaopen_luaevent_core(lua_State* L) {
 #ifdef _WIN32
 	WORD wVersionRequested = MAKEWORD(2, 2);
 	WSADATA wsaData;
-	WSAStartup(wVersionRequested, &wsaData);
+	if (!WSAStartup(wVersionRequested, &wsaData)) {
+		luaL_pushfail(L);
+		lua_pushfstring(L, "WSAStartup returned %d", GetLastError());
+		return 2;
+	}
 #endif
 	event_init( );
 	/* Setup metatable */
